@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from jose import jwt
 from passlib.context import CryptContext
+from passlib.exc import UnknownHashError
 
 from app.config import settings
 
@@ -16,7 +17,11 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        return pwd_context.verify(plain_password, hashed_password)
+    except UnknownHashError:
+        # Hash format is not recognized - return False to fail authentication
+        return False
 
 
 def create_access_token(data: dict):
@@ -35,3 +40,11 @@ def create_access_token(data: dict):
     )
 
     return encoded_jwt
+
+
+def decode_access_token(token: str):
+    return jwt.decode(
+        token,
+        settings.SECRET_KEY,
+        algorithms=[settings.ALGORITHM],
+    )
