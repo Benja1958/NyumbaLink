@@ -25,8 +25,6 @@ class Listing(Base):
     amenities = Column(JSON, nullable=True)
 
     is_available = Column(Boolean, default=True)
-    is_approved = Column(Boolean, default=True)
-    # For now, keep this True so tenants can see listings immediately.
-    # Later, when we add admin review, new listings will default to False.
+    is_approved = Column(Boolean, default=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
