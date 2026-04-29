@@ -13,6 +13,16 @@ class ListingCreate(BaseModel):
     image_url: Optional[str] = None
     amenities: Optional[List[str]] = []
 
+class ListingUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    location: Optional[str] = None
+    monthly_rent: Optional[float] = None
+    bedrooms: Optional[int] = None
+    bathrooms: Optional[int] = None
+    image_url: Optional[str] = None
+    amenities: Optional[List[str]] = None
+    is_available: Optional[bool] = None
 
 class ListingResponse(BaseModel):
     id: int
@@ -31,3 +41,4 @@ class ListingResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
