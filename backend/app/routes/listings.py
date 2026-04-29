@@ -6,7 +6,7 @@ from app.database import get_db
 from app.models.listing import Listing
 from app.models.user import User
 from app.schemas.listing import ListingCreate, ListingUpdate, ListingResponse
-from app.dependencies.auth import get_current_user
+from app.dependencies.auth import get_current_user, require_landlord
 
 
 router = APIRouter()
@@ -16,14 +16,8 @@ router = APIRouter()
 def create_listing(
     listing_data: ListingCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_landlord),
 ):
-    if current_user.role != "landlord":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only landlords can create property listings",
-        )
-
     new_listing = Listing(
         landlord_id=current_user.id,
         title=listing_data.title,
@@ -34,6 +28,7 @@ def create_listing(
         bathrooms=listing_data.bathrooms,
         image_url=listing_data.image_url,
         amenities=listing_data.amenities,
+        is_approved=False,
     )
 
     db.add(new_listing)
@@ -58,14 +53,8 @@ def get_listings(db: Session = Depends(get_db)):
 @router.get("/my-listings", response_model=List[ListingResponse])
 def get_my_listings(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_landlord),
 ):
-    if current_user.role != "landlord":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only landlords can view their own listings",
-        )
-
     listings = db.query(Listing).filter(Listing.landlord_id == current_user.id).all()
 
     return listings
@@ -75,14 +64,8 @@ def update_listing(
     listing_id: int,
     listing_data: ListingUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_landlord),
 ):
-    if current_user.role != "landlord":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only landlords can update property listings",
-        )
-
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
 
     if not listing:
@@ -111,14 +94,8 @@ def update_listing(
 def delete_listing(
     listing_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_landlord),
 ):
-    if current_user.role != "landlord":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only landlords can delete property listings",
-        )
-
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
 
     if not listing:
