@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from app.database import get_db
 from app.models.listing import Listing
@@ -37,13 +37,42 @@ def create_listing(
 
     return new_listing
 
-
 @router.get("/", response_model=List[ListingResponse])
-def get_listings(db: Session = Depends(get_db)):
-    listings = (
+def get_listings(
+    location: Optional[str] = None,
+    min_rent: Optional[float] = None,
+    max_rent: Optional[float] = None,
+    bedrooms: Optional[int] = None,
+    bathrooms: Optional[int] = None,
+    skip: int = 0,
+    limit: int = 20,
+    db: Session = Depends(get_db),
+):
+    query = (
         db.query(Listing)
         .filter(Listing.is_available == True)
         .filter(Listing.is_approved == True)
+    )
+
+    if location:
+        query = query.filter(Listing.location.ilike(f"%{location}%"))
+
+    if min_rent is not None:
+        query = query.filter(Listing.monthly_rent >= min_rent)
+
+    if max_rent is not None:
+        query = query.filter(Listing.monthly_rent <= max_rent)
+
+    if bedrooms is not None:
+        query = query.filter(Listing.bedrooms == bedrooms)
+
+    if bathrooms is not None:
+        query = query.filter(Listing.bathrooms == bathrooms)
+
+    listings = (
+        query.order_by(Listing.created_at.desc())
+        .offset(skip)
+        .limit(limit)
         .all()
     )
 
