@@ -54,6 +54,16 @@ def require_landlord(
 
     return current_user
 
+def require_tenant(
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.role != "tenant":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only tenants can perform this action",
+        )
+
+    return current_user
 
 def require_admin(
     current_user: User = Depends(get_current_user),

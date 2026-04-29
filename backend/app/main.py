@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 
 from app.database import Base, engine
-from app.models import user, listing
-from app.routes import auth, listings, admin
+from app.models import user, listing, favorite
+from app.routes import auth, listings, admin, favorites
 
 
 Base.metadata.create_all(bind=engine)
@@ -31,3 +31,4 @@ def health_check():
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(listings.router, prefix="/listings", tags=["Listings"])
 app.include_router(admin.router, prefix="/admin", tags=["Admin"])
+app.include_router(favorites.router, prefix="/favorites", tags=["Favorites"])
