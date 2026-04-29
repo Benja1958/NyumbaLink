@@ -5,7 +5,7 @@ from typing import List
 from app.database import get_db
 from app.models.listing import Listing
 from app.models.user import User
-from app.schemas.listing import ListingCreate, ListingResponse
+from app.schemas.listing import ListingCreate, ListingUpdate, ListingResponse
 from app.dependencies.auth import get_current_user
 
 
@@ -70,6 +70,74 @@ def get_my_listings(
 
     return listings
 
+@router.patch("/{listing_id}", response_model=ListingResponse)
+def update_listing(
+    listing_id: int,
+    listing_data: ListingUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.role != "landlord":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only landlords can update property listings",
+        )
+
+    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+
+    if not listing:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Listing not found",
+        )
+
+    if listing.landlord_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only update your own listings",
+        )
+
+    update_data = listing_data.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(listing, field, value)
+
+    db.commit()
+    db.refresh(listing)
+
+    return listing
+
+@router.delete("/{listing_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_listing(
+    listing_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.role != "landlord":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only landlords can delete property listings",
+        )
+
+    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+
+    if not listing:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Listing not found",
+        )
+
+    if listing.landlord_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only delete your own listings",
+        )
+
+    db.delete(listing)
+    db.commit()
+
+    return None
+
 
 @router.get("/{listing_id}", response_model=ListingResponse)
 def get_listing(
@@ -85,3 +153,4 @@ def get_listing(
         )
 
     return listing
+
