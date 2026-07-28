@@ -3,8 +3,40 @@ import PropertyCard from "@/components/PropertyCard";
 import SearchFilters from "@/components/SearchFilters";
 import { getListings } from "@/lib/api";
 
-export default async function TenantPage() {
-  const listings = await getListings();
+type TenantPageProps = {
+  searchParams: Promise<{
+    location?: string;
+    min_rent?: string;
+    max_rent?: string;
+    bedrooms?: string;
+    bathrooms?: string;
+  }>;
+};
+
+export default async function TenantPage({
+  searchParams,
+}: TenantPageProps) {
+  const params = await searchParams;
+
+  const listings = await getListings({
+    location: params.location || undefined,
+
+    min_rent: params.min_rent
+      ? Number(params.min_rent)
+      : undefined,
+
+    max_rent: params.max_rent
+      ? Number(params.max_rent)
+      : undefined,
+
+    bedrooms: params.bedrooms
+      ? Number(params.bedrooms)
+      : undefined,
+
+    bathrooms: params.bathrooms
+      ? Number(params.bathrooms)
+      : undefined,
+  });
 
   return (
     <>
@@ -30,11 +62,11 @@ export default async function TenantPage() {
         {listings.length === 0 ? (
           <div className="mt-10 rounded-xl border border-dashed border-gray-300 p-10 text-center">
             <h2 className="text-lg font-semibold">
-              No properties available
+              No properties found
             </h2>
 
             <p className="mt-2 text-gray-500">
-              Check back soon for new listings.
+              Try adjusting your search filters.
             </p>
           </div>
         ) : (
