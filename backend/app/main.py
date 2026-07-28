@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from app.database import Base, engine
 from app.models import user, listing, favorite
 from app.routes import auth, listings, admin, favorites
+from fastapi.middleware.cors import CORSMiddleware
 
 
 Base.metadata.create_all(bind=engine)
@@ -11,6 +12,19 @@ app = FastAPI(
     title="NyumbaLink API",
     description="Backend API for a Kenya-based rental housing platform.",
     version="0.4.0",
+)
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 

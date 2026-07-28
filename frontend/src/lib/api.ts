@@ -63,13 +63,20 @@ export async function getListings(
   return response.json();
 }
 
-export async function getListing(id: number): Promise<Listing> {
-  const response = await fetch(`${API_URL}/listings/${id}`, {
-    cache: "no-store",
-  });
+export async function getListing(
+  id: number
+): Promise<Listing> {
+  const response = await fetch(
+    `${API_URL}/listings/${id}`,
+    {
+      cache: "no-store",
+    }
+  );
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch listing: ${response.status}`);
+    throw new Error(
+      `Failed to fetch listing: ${response.status}`
+    );
   }
 
   return response.json();
