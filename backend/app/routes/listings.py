@@ -64,10 +64,10 @@ def get_listings(
         query = query.filter(Listing.monthly_rent <= max_rent)
 
     if bedrooms is not None:
-        query = query.filter(Listing.bedrooms == bedrooms)
+        query = query.filter(Listing.bedrooms >= bedrooms)
 
     if bathrooms is not None:
-        query = query.filter(Listing.bathrooms == bathrooms)
+        query = query.filter(Listing.bathrooms >= bathrooms)
 
     listings = (
         query.order_by(Listing.created_at.desc())
