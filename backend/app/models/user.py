@@ -21,4 +21,25 @@ class User(Base):
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    favorites = relationship("Favorite", back_populates="tenant", cascade="all, delete-orphan")
+    favorites = relationship(
+        "Favorite", 
+        back_populates="tenant", 
+        cascade="all, delete-orphan")
+
+    tenant_conversations = relationship(
+        "Conversation",
+        foreign_keys="Conversation.tenant_id",
+        back_populates="tenant",
+    )
+
+    landlord_conversations = relationship(
+        "Conversation",
+        foreign_keys="Conversation.landlord_id",
+        back_populates="landlord",
+    )
+
+    sent_messages = relationship(
+        "Message",
+        foreign_keys="Message.sender_id",
+        back_populates="sender",
+    )
