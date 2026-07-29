@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 
 type ProtectedRouteProps = {
   children: ReactNode;
-  allowedRole?: "tenant" | "landlord";
+  allowedRole?: "tenant" | "landlord" | "admin";
 };
 
 export default function ProtectedRoute({
@@ -62,14 +62,26 @@ export default function ProtectedRoute({
   }
 
   if (!isAuthenticated || !user) {
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-gray-500">
+          Redirecting...
+        </p>
+      </div>
+    );
   }
 
   if (
     allowedRole &&
     user.role !== allowedRole
   ) {
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-gray-500">
+          Redirecting...
+        </p>
+      </div>
+    );
   }
 
   return <>{children}</>;

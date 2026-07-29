@@ -26,7 +26,9 @@ export default function Navbar() {
   }
 
   const homeHref =
-    user?.role === "landlord"
+    user?.role === "admin"
+      ? "/admin"
+      : user?.role === "landlord"
       ? "/landlord"
       : "/tenant";
 
@@ -65,6 +67,15 @@ export default function Navbar() {
                   className="text-sm font-medium text-gray-700 hover:text-gray-950"
                 >
                   My Properties
+                </Link>
+              )}
+              
+              {user.role === "admin" && (
+                <Link
+                  href="/admin"
+                  className="text-sm font-medium text-gray-700 hover:text-gray-950"
+                >
+                  Admin Dashboard
                 </Link>
               )}
 

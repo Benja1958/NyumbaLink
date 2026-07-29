@@ -35,7 +35,9 @@ export default function LoginPage() {
 
         login(data.access_token, data.user);
 
-      if (data.user.role === "landlord") {
+      if (data.user.role === "admin") {
+        router.push("/admin");
+      } else if (data.user.role === "landlord") {
         router.push("/landlord");
       } else {
         router.push("/tenant");

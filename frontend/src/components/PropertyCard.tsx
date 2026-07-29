@@ -56,7 +56,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          {property.amenities.map((amenity) => (
+          {[...new Set(property.amenities)].map((amenity) => (
             <span
               key={amenity}
               className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700"
