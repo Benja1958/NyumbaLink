@@ -31,4 +31,13 @@ class Listing(Base):
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    favorites = relationship("Favorite", back_populates="listing", cascade="all, delete-orphan")
+    favorites = relationship(
+        "Favorite", 
+        back_populates="listing", 
+        cascade="all, delete-orphan")
+
+    conversations = relationship(
+        "Conversation",
+        back_populates="listing",
+        cascade="all, delete-orphan",
+    )
