@@ -2,12 +2,15 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 
 import { loginUser } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
+
+  const { login } = useAuth();
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,15 +33,7 @@ export default function LoginPage() {
           formData.get("password")?.toString() ?? "",
       });
 
-      localStorage.setItem(
-        "access_token",
-        data.access_token
-      );
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify(data.user)
-      );
+        login(data.access_token, data.user);
 
       if (data.user.role === "landlord") {
         router.push("/landlord");
