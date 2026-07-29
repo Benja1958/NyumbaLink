@@ -23,6 +23,8 @@ class ListingUpdate(BaseModel):
     image_url: Optional[str] = None
     amenities: Optional[List[str]] = None
     is_available: Optional[bool] = None
+    approval_status: Optional[str] = None
+    is_approved: Optional[bool] = None
 
 class ListingResponse(BaseModel):
     id: int
@@ -37,6 +39,7 @@ class ListingResponse(BaseModel):
     amenities: Optional[List[str]] = []
     is_available: bool
     is_approved: bool
+    approval_status: str
     created_at: datetime
 
     class Config:

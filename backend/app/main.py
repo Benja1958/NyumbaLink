@@ -1,12 +1,13 @@
 from fastapi import FastAPI
 
-from app.database import Base, engine
+from app.database import Base, engine, ensure_listing_approval_status_column
 from app.models import user, listing, favorite
 from app.routes import auth, listings, admin, favorites
 from fastapi.middleware.cors import CORSMiddleware
 
 
 Base.metadata.create_all(bind=engine)
+ensure_listing_approval_status_column()
 
 app = FastAPI(
     title="NyumbaLink API",

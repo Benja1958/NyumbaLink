@@ -27,6 +27,7 @@ class Listing(Base):
 
     is_available = Column(Boolean, default=True)
     is_approved = Column(Boolean, default=False)
+    approval_status = Column(String, nullable=False, default="pending")
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
