@@ -1,12 +1,5 @@
 import Link from "next/link";
-import {
-  Bath,
-  Bed,
-  CheckCircle2,
-  Heart,
-  MapPin,
-  Send,
-} from "lucide-react";
+import { Bath, Bed, CheckCircle2, Heart, MapPin, Send } from "lucide-react";
 
 import { getListing } from "@/lib/api";
 
@@ -16,12 +9,12 @@ type ListingPageProps = {
   }>;
 };
 
-export default async function ListingPage({
-  params,
-}: ListingPageProps) {
+export default async function ListingPage({ params }: ListingPageProps) {
   const { id } = await params;
 
   const property = await getListing(Number(id));
+  const approvalStatus =
+    property.approval_status ?? (property.is_approved ? "approved" : "pending");
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-10">
@@ -47,7 +40,7 @@ export default async function ListingPage({
                   {property.title}
                 </h1>
 
-                {property.is_approved && (
+                {approvalStatus === "approved" && (
                   <span className="flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
                     <CheckCircle2 className="h-4 w-4" />
                     Verified
@@ -91,9 +84,7 @@ export default async function ListingPage({
           </div>
 
           <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6">
-            <h2 className="text-xl font-semibold">
-              Description
-            </h2>
+            <h2 className="text-xl font-semibold">Description</h2>
 
             <p className="mt-4 leading-7 text-gray-600">
               {property.description}
@@ -101,9 +92,7 @@ export default async function ListingPage({
           </div>
 
           <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6">
-            <h2 className="text-xl font-semibold">
-              Amenities
-            </h2>
+            <h2 className="text-xl font-semibold">Amenities</h2>
 
             <div className="mt-4 flex flex-wrap gap-3">
               {property.amenities.map((amenity) => (

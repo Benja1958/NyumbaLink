@@ -1,13 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Bath,
-  Bed,
-  MapPin,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { Bath, Bed, MapPin, Pencil, Trash2 } from "lucide-react";
 
 import { Listing } from "@/types/listing";
 
@@ -22,6 +16,23 @@ export default function LandlordListingCard({
   onDelete,
   deleting = false,
 }: LandlordListingCardProps) {
+  const approvalStatus =
+    listing.approval_status ?? (listing.is_approved ? "approved" : "pending");
+
+  const approvalLabel =
+    approvalStatus === "approved"
+      ? "Approved"
+      : approvalStatus === "rejected"
+        ? "Rejected"
+        : "Pending";
+
+  const approvalClasses =
+    approvalStatus === "approved"
+      ? "bg-green-100 text-green-700"
+      : approvalStatus === "rejected"
+        ? "bg-red-100 text-red-700"
+        : "bg-amber-100 text-amber-700";
+
   return (
     <article className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
       <img
@@ -39,22 +50,16 @@ export default function LandlordListingCard({
 
             <div className="mt-1 flex items-center gap-1 text-sm text-gray-500">
               <MapPin className="h-4 w-4 shrink-0" />
-              <span className="truncate">
-                {listing.location}
-              </span>
+              <span className="truncate">{listing.location}</span>
             </div>
           </div>
 
           <div className="flex shrink-0 flex-wrap justify-end gap-2">
-            {listing.is_approved ? (
-              <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                Approved
-              </span>
-            ) : (
-              <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
-                Pending
-              </span>
-            )}
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-medium ${approvalClasses}`}
+            >
+              {approvalLabel}
+            </span>
 
             {listing.is_available ? (
               <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
@@ -85,9 +90,7 @@ export default function LandlordListingCard({
             KES {listing.monthly_rent.toLocaleString()}
           </span>
 
-          <span className="text-sm text-gray-500">
-            /month
-          </span>
+          <span className="text-sm text-gray-500">/month</span>
         </div>
 
         <div className="mt-5 flex gap-3 border-t border-gray-100 pt-4">
