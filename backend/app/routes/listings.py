@@ -29,6 +29,7 @@ def create_listing(
         image_url=listing_data.image_url,
         amenities=listing_data.amenities,
         is_approved=False,
+        approval_status="pending",
     )
 
     db.add(new_listing)
@@ -51,7 +52,7 @@ def get_listings(
     query = (
         db.query(Listing)
         .filter(Listing.is_available == True)
-        .filter(Listing.is_approved == True)
+        .filter(Listing.approval_status == "approved")
     )
 
     if location:
@@ -112,7 +113,11 @@ def update_listing(
     update_data = listing_data.model_dump(exclude_unset=True)
 
     for field, value in update_data.items():
-        setattr(listing, field, value)
+        if field == "approval_status":
+            setattr(listing, field, value)
+            setattr(listing, "is_approved", value == "approved")
+        else:
+            setattr(listing, field, value)
 
     db.commit()
     db.refresh(listing)

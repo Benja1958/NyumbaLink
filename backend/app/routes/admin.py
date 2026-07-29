@@ -27,7 +27,7 @@ def get_pending_listings(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin),
 ):
-    listings = db.query(Listing).filter(Listing.is_approved == False).all()
+    listings = db.query(Listing).filter(Listing.approval_status == "pending").all()
 
     return listings
 
@@ -46,6 +46,7 @@ def approve_listing(
             detail="Listing not found",
         )
 
+    listing.approval_status = "approved"
     listing.is_approved = True
     listing.is_available = True
 
@@ -69,6 +70,7 @@ def reject_listing(
             detail="Listing not found",
         )
 
+    listing.approval_status = "rejected"
     listing.is_approved = False
     listing.is_available = False
 
