@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Bath, Bed, Heart, MapPin } from "lucide-react";
 
 import { Listing } from "@/types/listing";
+import FavoriteButton from "@/components/FavoriteButton";
 
 type PropertyCardProps = {
   property: Listing;
@@ -22,16 +23,12 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           className="h-52 w-full object-cover"
         />
 
-        <button
-          type="button"
-          onClick={(event) => {
-            event.preventDefault();
-            console.log("Favourite:", property.id);
-          }}
-          className="absolute right-3 top-3 rounded-full bg-white p-2 shadow"
+        <div
+          className="absolute right-3 top-3"
+          onClick={(event) => event.preventDefault()}
         >
-          <Heart className="h-5 w-5" />
-        </button>
+          <FavoriteButton listingId={property.id} />
+        </div>
       </div>
 
       <div className="p-5">

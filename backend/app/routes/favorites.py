@@ -92,3 +92,20 @@ def remove_favorite(
     db.commit()
 
     return None
+
+@router.get("/{listing_id}/status")
+def get_favorite_status(
+    listing_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_tenant),
+):
+    favorite = (
+        db.query(Favorite)
+        .filter(Favorite.tenant_id == current_user.id)
+        .filter(Favorite.listing_id == listing_id)
+        .first()
+    )
+
+    return {
+        "is_favorited": favorite is not None
+    }
