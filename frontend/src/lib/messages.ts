@@ -6,23 +6,44 @@ export type Message = {
   created_at: string;
 };
 
+export type Participant = {
+  id: number;
+  full_name: string;
+  role: "tenant" | "landlord";
+};
+
+export type ConversationListing = {
+  id: number;
+  title: string;
+  location: string;
+  image_url: string;
+  monthly_rent: number;
+};
+
 export type Conversation = {
   id: number;
   listing_id: number;
   tenant_id: number;
   landlord_id: number;
   created_at: string;
+
+  listing: ConversationListing;
+  tenant: Participant;
+  landlord: Participant;
 };
 
-export type ConversationWithMessages = Conversation & {
-  messages: Message[];
-};
+export type ConversationWithMessages =
+  Conversation & {
+    messages: Message[];
+  };
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+  process.env.NEXT_PUBLIC_API_URL ??
+  "http://127.0.0.1:8000";
 
 function getToken(): string {
-  const token = localStorage.getItem("access_token");
+  const token =
+    localStorage.getItem("access_token");
 
   if (!token) {
     throw new Error("You must be logged in");
