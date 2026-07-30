@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.models.listing_image import ListingImage
 
 from app.database import (
     Base,
@@ -22,6 +23,7 @@ from app.routes import (
     admin,
     favorites,
     messages,
+    images,
 )
 
 
@@ -90,4 +92,10 @@ app.include_router(
     messages.router,
     prefix="/messages",
     tags=["Messages"],
+)
+
+app.include_router(
+    images.router,
+    prefix="/listings",
+    tags=["Listing Images"],
 )
