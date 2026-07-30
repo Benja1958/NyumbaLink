@@ -1,5 +1,13 @@
 import Link from "next/link";
-import { Bath, Bed, CheckCircle2, Heart, MapPin, Send } from "lucide-react";
+import { 
+  Bath, 
+  Bed, 
+  CheckCircle2, 
+  MapPin
+} from "lucide-react";
+
+import MessageLandlordButton from "@/components/MessageLandlordButton";
+import FavoriteButton from "@/components/FavoriteButton";
 
 import { getListing } from "@/lib/api";
 
@@ -54,12 +62,8 @@ export default async function ListingPage({ params }: ListingPageProps) {
               </div>
             </div>
 
-            <button
-              type="button"
-              className="rounded-xl border border-gray-200 p-3 hover:bg-gray-50"
-            >
-              <Heart className="h-5 w-5" />
-            </button>
+            <FavoriteButton listingId={property.id} />
+
           </div>
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-6 rounded-xl border border-gray-200 bg-white p-6">
@@ -92,10 +96,12 @@ export default async function ListingPage({ params }: ListingPageProps) {
           </div>
 
           <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6">
-            <h2 className="text-xl font-semibold">Amenities</h2>
+            <h2 className="text-xl font-semibold">
+              Amenities
+            </h2>
 
             <div className="mt-4 flex flex-wrap gap-3">
-              {property.amenities.map((amenity) => (
+              {[...new Set(property.amenities)].map((amenity) => (
                 <span
                   key={amenity}
                   className="rounded-full bg-gray-100 px-4 py-2 text-sm text-gray-700"
@@ -114,21 +120,12 @@ export default async function ListingPage({ params }: ListingPageProps) {
             </h2>
 
             <p className="mt-2 text-sm text-gray-600">
-              Contact the landlord to ask questions or arrange a viewing.
+              Start a conversation with the landlord to ask questions or arrange a viewing.
             </p>
 
-            <textarea
-              placeholder="Hi, I'm interested in this property..."
-              className="mt-6 h-28 w-full resize-none rounded-lg border border-gray-300 p-3"
-            />
-
-            <button
-              type="button"
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-gray-950 py-3 font-medium text-white"
-            >
-              <Send className="h-4 w-4" />
-              Send Message
-            </button>
+            <div className="mt-6">
+              <MessageLandlordButton listingId={property.id} />
+            </div>
           </div>
         </aside>
       </div>

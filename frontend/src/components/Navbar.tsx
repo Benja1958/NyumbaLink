@@ -35,7 +35,6 @@ export default function Navbar() {
   return (
     <header className="border-b border-gray-200 bg-white">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-
         <Link
           href={isAuthenticated ? homeHref : "/"}
           className="flex items-center gap-2"
@@ -48,7 +47,6 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-4">
-
           {!loading && isAuthenticated && user ? (
             <>
               {user.role === "tenant" && (
@@ -69,7 +67,7 @@ export default function Navbar() {
                   My Properties
                 </Link>
               )}
-              
+
               {user.role === "admin" && (
                 <Link
                   href="/admin"
@@ -79,17 +77,20 @@ export default function Navbar() {
                 </Link>
               )}
 
-              <Link
-                href={
-                  user.role === "tenant"
-                    ? "/tenant/messages"
-                    : "/landlord/messages"
-                }
-                className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-950"
-              >
-                <MessageSquare className="h-4 w-4" />
-                Messages
-              </Link>
+              {(user.role === "tenant" ||
+                user.role === "landlord") && (
+                <Link
+                  href={
+                    user.role === "tenant"
+                      ? "/tenant/messages"
+                      : "/landlord/messages"
+                  }
+                  className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-950"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  Messages
+                </Link>
+              )}
 
               <span className="text-sm text-gray-600">
                 {user.full_name}
@@ -111,7 +112,6 @@ export default function Navbar() {
               Login
             </Link>
           ) : null}
-
         </div>
       </nav>
     </header>
