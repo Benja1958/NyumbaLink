@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
+from app.schemas.listing_image import ListingImageResponse
 
 
 class ListingCreate(BaseModel):
@@ -37,6 +38,7 @@ class ListingResponse(BaseModel):
     bathrooms: int
     image_url: Optional[str] = None
     amenities: Optional[List[str]] = []
+    images: List[ListingImageResponse] = []
     is_available: bool
     is_approved: bool
     approval_status: str

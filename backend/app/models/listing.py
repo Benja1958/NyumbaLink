@@ -41,3 +41,10 @@ class Listing(Base):
         back_populates="listing",
         cascade="all, delete-orphan",
     )
+
+    images = relationship(
+        "ListingImage",
+        back_populates="listing",
+        cascade="all, delete-orphan",
+        order_by="ListingImage.position",
+    )

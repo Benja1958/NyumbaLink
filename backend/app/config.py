@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     ADMIN_PHONE_NUMBER: str | None = None
     ADMIN_FULL_NAME: str = "NyumbaLink Admin"
 
+    CLOUDINARY_CLOUD_NAME: str
+    CLOUDINARY_API_KEY: str
+    CLOUDINARY_API_SECRET: str
+
     class Config:
         env_file = ".env"
 
