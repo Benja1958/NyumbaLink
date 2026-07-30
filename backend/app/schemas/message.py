@@ -11,6 +11,26 @@ class MessageCreate(BaseModel):
     content: str
 
 
+class ParticipantResponse(BaseModel):
+    id: int
+    full_name: str
+    role: str
+
+    class Config:
+        from_attributes = True
+
+
+class ConversationListingResponse(BaseModel):
+    id: int
+    title: str
+    location: str
+    image_url: str
+    monthly_rent: float
+
+    class Config:
+        from_attributes = True
+
+
 class MessageResponse(BaseModel):
     id: int
     conversation_id: int
@@ -29,9 +49,15 @@ class ConversationResponse(BaseModel):
     landlord_id: int
     created_at: datetime
 
+    listing: ConversationListingResponse
+    tenant: ParticipantResponse
+    landlord: ParticipantResponse
+
     class Config:
         from_attributes = True
 
 
-class ConversationWithMessagesResponse(ConversationResponse):
+class ConversationWithMessagesResponse(
+    ConversationResponse
+):
     messages: list[MessageResponse] = []

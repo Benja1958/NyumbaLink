@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -11,29 +12,66 @@ from app.utils.security import hash_password, verify_password, create_access_tok
 router = APIRouter()
 
 
-@router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def signup(user_data: UserCreate, db: Session = Depends(get_db)):
-    existing_user = db.query(User).filter(User.email == user_data.email).first()
+@router.post(
+    "/signup",
+    # response_model=...,
+    status_code=status.HTTP_201_CREATED,
+)
+def signup(
+    user_data: UserCreate,
+    db: Session = Depends(get_db),
+):
+    existing_email = (
+        db.query(User)
+        .filter(User.email == user_data.email)
+        .first()
+    )
 
-    if existing_user:
+    if existing_email:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered",
         )
 
-    new_user = User(
+    existing_phone = (
+        db.query(User)
+        .filter(
+            User.phone_number == user_data.phone_number
+        )
+        .first()
+    )
+
+    if existing_phone:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Phone number already registered",
+        )
+
+    user = User(
         full_name=user_data.full_name,
         email=user_data.email,
         phone_number=user_data.phone_number,
-        password_hash=hash_password(user_data.password),
+        password_hash=hash_password(
+            user_data.password
+        ),
         role=user_data.role,
     )
 
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    db.add(user)
 
-    return new_user
+    try:
+        db.commit()
+        db.refresh(user)
+
+    except IntegrityError:
+        db.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email or phone number already registered",
+        )
+
+    return user
 
 
 @router.post("/login", response_model=TokenResponse)
