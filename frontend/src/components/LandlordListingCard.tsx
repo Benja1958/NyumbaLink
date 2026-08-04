@@ -33,10 +33,17 @@ export default function LandlordListingCard({
         ? "bg-red-100 text-red-700"
         : "bg-amber-100 text-amber-700";
 
+  const coverImage =
+    listing.images?.find(
+      (image) => image.is_cover
+    )?.image_url ??
+    listing.images?.[0]?.image_url ??
+    listing.image_url;
+
   return (
     <article className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
       <img
-        src={listing.image_url}
+        src={coverImage || "/placeholder-property.jpg"}
         alt={listing.title}
         className="h-48 w-full object-cover"
       />

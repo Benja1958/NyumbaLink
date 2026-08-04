@@ -147,15 +147,20 @@ export default function ConversationPage() {
                 ? conversation.landlord
                 : conversation.tenant;
 
+            const coverImage =
+              conversation.listing.images?.find(
+                (image) => image.is_cover
+              )?.image_url ??
+              conversation.listing.images?.[0]?.image_url ??
+              conversation.listing.image_url;
+
             return (
               <>
                 {/* Header */}
                 <div className="flex items-center gap-4 border-b border-gray-200 pb-5">
 
                   <img
-                    src={
-                      conversation.listing.image_url
-                    }
+                    src={coverImage ?? ""}
                     alt={
                       conversation.listing.title
                     }

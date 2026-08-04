@@ -2,6 +2,8 @@
 
 import { FormEvent, useState } from "react";
 
+import ImageUploader from "@/components/ImageUploader";
+
 import { ListingPayload } from "@/lib/landlordListings";
 
 type ListingFormProps = {
@@ -9,17 +11,24 @@ type ListingFormProps = {
   submitLabel: string;
 
   onSubmit: (
-    payload: ListingPayload
+    payload: ListingPayload,
+    images: File[]
   ) => Promise<void>;
+
+  requireImages?: boolean;
 };
 
 export default function ListingForm({
   initialValues,
   submitLabel,
   onSubmit,
+  requireImages = false,
 }: ListingFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [images, setImages] =
+    useState<File[]>([]);
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
@@ -29,7 +38,8 @@ export default function ListingForm({
     setLoading(true);
     setError("");
 
-    const formData = new FormData(event.currentTarget);
+    const formData =
+      new FormData(event.currentTarget);
 
     const amenitiesText =
       formData.get("amenities")?.toString() ?? "";
@@ -38,42 +48,54 @@ export default function ListingForm({
       .split(",")
       .map((amenity) => amenity.trim())
       .filter(Boolean);
-    
+
     const isAvailable =
-        formData.get("is_available") === "on";
+      formData.get("is_available") === "on";
+
+    if (
+      requireImages &&
+      images.length === 0
+    ) {
+      setError(
+        "Please select at least one property photo"
+      );
+
+      setLoading(false);
+      return;
+    }
 
     const payload: ListingPayload = {
-    title:
+      title:
         formData.get("title")?.toString() ?? "",
 
-    description:
+      description:
         formData.get("description")?.toString() ?? "",
 
-    location:
+      location:
         formData.get("location")?.toString() ?? "",
 
-    monthly_rent: Number(
+      monthly_rent: Number(
         formData.get("monthly_rent")
-    ),
+      ),
 
-    bedrooms: Number(
+      bedrooms: Number(
         formData.get("bedrooms")
-    ),
+      ),
 
-    bathrooms: Number(
+      bathrooms: Number(
         formData.get("bathrooms")
-    ),
+      ),
 
-    image_url:
-        formData.get("image_url")?.toString() ?? "",
+      amenities,
 
-    amenities,
-
-    is_available: isAvailable,
+      is_available: isAvailable,
     };
 
     try {
-      await onSubmit(payload);
+      await onSubmit(
+        payload,
+        images
+      );
     } catch (error) {
       setError(
         error instanceof Error
@@ -90,7 +112,6 @@ export default function ListingForm({
       onSubmit={handleSubmit}
       className="space-y-6"
     >
-
       <div>
         <label className="mb-2 block text-sm font-medium">
           Property Title
@@ -99,7 +120,9 @@ export default function ListingForm({
         <input
           name="title"
           required
-          defaultValue={initialValues?.title ?? ""}
+          defaultValue={
+            initialValues?.title ?? ""
+          }
           placeholder="Modern 2-bedroom apartment"
           className="w-full rounded-lg border border-gray-300 px-4 py-3"
         />
@@ -113,7 +136,9 @@ export default function ListingForm({
         <textarea
           name="description"
           required
-          defaultValue={initialValues?.description ?? ""}
+          defaultValue={
+            initialValues?.description ?? ""
+          }
           placeholder="Describe the property..."
           className="h-36 w-full resize-none rounded-lg border border-gray-300 px-4 py-3"
         />
@@ -127,14 +152,15 @@ export default function ListingForm({
         <input
           name="location"
           required
-          defaultValue={initialValues?.location ?? ""}
+          defaultValue={
+            initialValues?.location ?? ""
+          }
           placeholder="Kilimani, Nairobi"
           className="w-full rounded-lg border border-gray-300 px-4 py-3"
         />
       </div>
 
       <div className="grid gap-5 sm:grid-cols-3">
-
         <div>
           <label className="mb-2 block text-sm font-medium">
             Monthly Rent
@@ -186,27 +212,12 @@ export default function ListingForm({
             className="w-full rounded-lg border border-gray-300 px-4 py-3"
           />
         </div>
-
       </div>
 
-      <div>
-        <label className="mb-2 block text-sm font-medium">
-          Image URL
-        </label>
-
-        <input
-          name="image_url"
-          type="url"
-          required
-          defaultValue={initialValues?.image_url ?? ""}
-          placeholder="https://..."
-          className="w-full rounded-lg border border-gray-300 px-4 py-3"
-        />
-
-        <p className="mt-2 text-xs text-gray-500">
-          We&apos;ll replace this with proper image uploads later.
-        </p>
-      </div>
+      <ImageUploader
+        files={images}
+        onChange={setImages}
+      />
 
       <div>
         <label className="mb-2 block text-sm font-medium">
@@ -227,32 +238,32 @@ export default function ListingForm({
         </p>
       </div>
 
-          <div className="flex items-center justify-between rounded-xl border border-gray-200 p-4">
-      <div>
-        <p className="font-medium text-gray-900">
-          Property Availability
-        </p>
+      <div className="flex items-center justify-between rounded-xl border border-gray-200 p-4">
+        <div>
+          <p className="font-medium text-gray-900">
+            Property Availability
+          </p>
 
-        <p className="mt-1 text-sm text-gray-500">
-          Turn this off if the property is no longer available for rent.
-        </p>
-      </div>
-
-      <label className="relative inline-flex cursor-pointer items-center">
-        <input
-          type="checkbox"
-          name="is_available"
-          defaultChecked={
-            initialValues?.is_available ?? true
-          }
-          className="peer sr-only"
-        />
-
-        <div className="h-6 w-11 rounded-full bg-gray-300 transition peer-checked:bg-green-700">
-          <div className="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5" />
+          <p className="mt-1 text-sm text-gray-500">
+            Turn this off if the property is no longer available for rent.
+          </p>
         </div>
-      </label>
-    </div>
+
+        <label className="relative inline-flex cursor-pointer items-center">
+          <input
+            type="checkbox"
+            name="is_available"
+            defaultChecked={
+              initialValues?.is_available ?? true
+            }
+            className="peer sr-only"
+          />
+
+          <div className="h-6 w-11 rounded-full bg-gray-300 transition peer-checked:bg-green-700">
+            <div className="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5" />
+          </div>
+        </label>
+      </div>
 
       {error && (
         <p className="text-sm text-red-600">
@@ -265,9 +276,10 @@ export default function ListingForm({
         disabled={loading}
         className="w-full rounded-lg bg-green-800 py-3 font-semibold text-white hover:bg-green-900 disabled:opacity-50"
       >
-        {loading ? "Saving..." : submitLabel}
+        {loading
+          ? "Saving..."
+          : submitLabel}
       </button>
-
     </form>
   );
 }

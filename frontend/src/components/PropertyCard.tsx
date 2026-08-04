@@ -11,6 +11,12 @@ type PropertyCardProps = {
 };
 
 export default function PropertyCard({ property }: PropertyCardProps) {
+  const coverImage =
+    property.images?.find(
+      (image) => image.is_cover
+    )?.image_url ??
+    property.images?.[0]?.image_url ??
+    property.image_url;
   return (
     <Link
       href={`/listings/${property.id}`}
@@ -18,9 +24,9 @@ export default function PropertyCard({ property }: PropertyCardProps) {
     >
       <div className="relative">
         <img
-          src={property.image_url}
+          src={coverImage || "/placeholder-property.jpg"}
           alt={property.title}
-          className="h-52 w-full object-cover"
+          className="h-48 w-full object-cover"
         />
 
         <div

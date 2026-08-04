@@ -22,8 +22,7 @@ export default function NewListingPage() {
     payload: ListingPayload,
     images: File[]
   ) {
-    const listing =
-      await createListing(payload);
+    const listing = await createListing(payload);
 
     await uploadListingImages(
       listing.id,
@@ -38,7 +37,6 @@ export default function NewListingPage() {
       <Navbar />
 
       <main className="mx-auto max-w-3xl px-6 py-10">
-
         <Link
           href="/landlord"
           className="text-sm text-gray-600 hover:text-gray-900"
@@ -51,7 +49,7 @@ export default function NewListingPage() {
         </h1>
 
         <p className="mt-2 text-gray-600">
-          Add the details tenants need to evaluate your property.
+          Add the property details and upload photos for tenants to view.
         </p>
 
         <div className="mt-8 rounded-xl border bg-white p-6">
@@ -61,7 +59,6 @@ export default function NewListingPage() {
             requireImages
           />
         </div>
-
       </main>
     </>
   );

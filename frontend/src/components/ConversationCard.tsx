@@ -21,13 +21,20 @@ export default function ConversationCard({
       ? conversation.landlord
       : conversation.tenant;
 
+  const coverImage =
+    conversation.listing.images?.find(
+      (image) => image.is_cover
+    )?.image_url ??
+    conversation.listing.images?.[0]?.image_url ??
+    conversation.listing.image_url;
+
   return (
     <Link
       href={`/messages/${conversation.id}`}
       className="flex gap-4 rounded-2xl border border-gray-200 bg-white p-4 transition hover:border-gray-300 hover:shadow-sm"
     >
       <img
-        src={conversation.listing.image_url}
+        src={coverImage ?? ""}
         alt={conversation.listing.title}
         className="h-20 w-24 shrink-0 rounded-xl object-cover"
       />

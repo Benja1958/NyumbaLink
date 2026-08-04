@@ -1,3 +1,12 @@
+export type ListingImage = {
+  id: number;
+  listing_id: number;
+  image_url: string;
+  position: number;
+  is_cover: boolean;
+  created_at: string;
+};
+
 export type Listing = {
   id: number;
   landlord_id: number;
@@ -8,6 +17,7 @@ export type Listing = {
   bedrooms: number;
   bathrooms: number;
   image_url: string;
+  images: ListingImage[];
   amenities: string[];
   is_available: boolean;
   is_approved: boolean;
