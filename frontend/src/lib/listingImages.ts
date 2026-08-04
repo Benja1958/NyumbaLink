@@ -69,3 +69,57 @@ export async function uploadListingImages(
 
   return response.json();
 }
+
+export async function deleteListingImage(
+  listingId: number,
+  imageId: number
+): Promise<void> {
+  const token = getToken();
+
+  const response = await fetch(
+    `${API_URL}/listings/${listingId}/images/${imageId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      await getErrorMessage(
+        response,
+        "Failed to delete image"
+      )
+    );
+  }
+}
+
+export async function setListingCoverImage(
+  listingId: number,
+  imageId: number
+): Promise<ListingImage> {
+  const token = getToken();
+
+  const response = await fetch(
+    `${API_URL}/listings/${listingId}/images/${imageId}/cover`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      await getErrorMessage(
+        response,
+        "Failed to set cover image"
+      )
+    );
+  }
+
+  return response.json();
+}
