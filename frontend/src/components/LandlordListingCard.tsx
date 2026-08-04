@@ -43,9 +43,9 @@ export default function LandlordListingCard({
   return (
     <article className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
       <img
-        src={coverImage || "/placeholder-property.jpg"}
+        src={coverImage ?? ""}
         alt={listing.title}
-        className="h-48 w-full object-cover"
+        className="aspect-[4/3] w-full bg-gray-100 object-cover object-center"
       />
 
       <div className="p-5">

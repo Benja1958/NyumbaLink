@@ -24,9 +24,9 @@ export default function PropertyCard({ property }: PropertyCardProps) {
     >
       <div className="relative">
         <img
-          src={coverImage || "/placeholder-property.jpg"}
+          src={coverImage ?? ""}
           alt={property.title}
-          className="h-48 w-full object-cover"
+          className="aspect-[4/3] w-full bg-gray-100 object-cover object-center"
         />
 
         <div

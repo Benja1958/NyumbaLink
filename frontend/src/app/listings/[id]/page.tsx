@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PropertyImageGallery from "@/components/PropertyImageGallery";
 import { 
   Bath, 
   Bed, 
@@ -21,13 +22,6 @@ export default async function ListingPage({ params }: ListingPageProps) {
   const { id } = await params;
 
   const property = await getListing(Number(id));
-  
-  const coverImage =
-    property.images?.find(
-      (image) => image.is_cover
-    )?.image_url ??
-    property.images?.[0]?.image_url ??
-    property.image_url;
 
   const approvalStatus =
     property.approval_status ?? (property.is_approved ? "approved" : "pending");
@@ -43,10 +37,10 @@ export default async function ListingPage({ params }: ListingPageProps) {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[2fr_1fr]">
         <section>
-          <img
-            src={coverImage || "/placeholder-property.jpg"}
-            alt={property.title}
-            className="h-[420px] w-full rounded-2xl object-cover"
+          <PropertyImageGallery
+            images={property.images ?? []}
+            fallbackImage={property.image_url}
+            title={property.title}
           />
 
           <div className="mt-6 flex items-start justify-between gap-4">
