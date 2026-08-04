@@ -1,6 +1,7 @@
 from datetime import datetime
-
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from typing import Optional
+from app.schemas.listing_image import ListingImageResponse
 
 
 class ConversationCreate(BaseModel):
@@ -24,12 +25,14 @@ class ConversationListingResponse(BaseModel):
     id: int
     title: str
     location: str
-    image_url: str
+    image_url: Optional[str] = None
+    images: list[ListingImageResponse] = Field(
+        default_factory=list
+    )
     monthly_rent: float
 
     class Config:
         from_attributes = True
-
 
 class MessageResponse(BaseModel):
     id: int

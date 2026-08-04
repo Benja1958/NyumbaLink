@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
 from app.schemas.listing_image import ListingImageResponse
@@ -12,7 +12,7 @@ class ListingCreate(BaseModel):
     bedrooms: int
     bathrooms: int
     image_url: Optional[str] = None
-    amenities: Optional[List[str]] = []
+    amenities: List[str] = Field(default_factory=list)
 
 class ListingUpdate(BaseModel):
     title: Optional[str] = None
@@ -37,8 +37,8 @@ class ListingResponse(BaseModel):
     bedrooms: int
     bathrooms: int
     image_url: Optional[str] = None
-    amenities: Optional[List[str]] = []
-    images: List[ListingImageResponse] = []
+    amenities: List[str] = Field(default_factory=list)
+    images: List[ListingImageResponse] = Field(default_factory=list)
     is_available: bool
     is_approved: bool
     approval_status: str

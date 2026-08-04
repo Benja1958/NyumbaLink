@@ -1,3 +1,5 @@
+import { ListingImage } from "@/types/listing";
+
 export type Message = {
   id: number;
   conversation_id: number;
@@ -16,7 +18,8 @@ export type ConversationListing = {
   id: number;
   title: string;
   location: string;
-  image_url: string;
+  image_url: string | null;
+  images: ListingImage[];
   monthly_rent: number;
 };
 
