@@ -1,6 +1,6 @@
 from typing import Annotated
-
 import cloudinary.uploader
+from sqlalchemy import func
 
 from fastapi import (
     APIRouter,
@@ -73,6 +73,20 @@ def upload_listing_images(
             detail="Select at least one image",
         )
 
+    max_position = (
+        db.query(func.max(ListingImage.position))
+        .filter(
+            ListingImage.listing_id == listing_id
+        )
+        .scalar()
+    )
+
+    next_position = (
+        max_position + 1
+        if max_position is not None
+        else 0
+    )
+
     existing_count = (
         db.query(ListingImage)
         .filter(ListingImage.listing_id == listing_id)
@@ -126,7 +140,7 @@ def upload_listing_images(
                 listing_id=listing_id,
                 image_url=result["secure_url"],
                 public_id=public_id,
-                position=existing_count + index,
+                position=next_position + index,
                 is_cover=(
                     existing_count == 0
                     and index == 0
@@ -167,6 +181,70 @@ def upload_listing_images(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to upload images",
         )
+
+
+@router.patch(
+    "/{listing_id}/images/{image_id}/cover",
+    response_model=ListingImageResponse,
+)
+def set_cover_image(
+    listing_id: int,
+    image_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_landlord),
+):
+    listing = (
+        db.query(Listing)
+        .filter(Listing.id == listing_id)
+        .first()
+    )
+
+    if not listing:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Listing not found",
+        )
+
+    if listing.landlord_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot modify this listing",
+        )
+
+    image = (
+        db.query(ListingImage)
+        .filter(
+            ListingImage.id == image_id,
+            ListingImage.listing_id == listing_id,
+        )
+        .first()
+    )
+
+    if not image:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Image not found",
+        )
+
+    (
+        db.query(ListingImage)
+        .filter(
+            ListingImage.listing_id == listing_id
+        )
+        .update(
+            {
+                ListingImage.is_cover: False
+            },
+            synchronize_session=False,
+        )
+    )
+
+    image.is_cover = True
+
+    db.commit()
+    db.refresh(image)
+
+    return image
 
 
 @router.delete(

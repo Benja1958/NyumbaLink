@@ -14,6 +14,7 @@ import {
 
 import Navbar from "@/components/Navbar";
 import ListingForm from "@/components/ListingForm";
+import ExistingListingImages from "@/components/ExistingListingImages";
 
 import { getListing } from "@/lib/api";
 
@@ -22,7 +23,10 @@ import {
   updateListing,
 } from "@/lib/landlordListings";
 
-import { Listing } from "@/types/listing";
+import {
+  Listing,
+  ListingImage,
+} from "@/types/listing";
 
 export default function EditListingPage() {
   const params = useParams();
@@ -33,6 +37,9 @@ export default function EditListingPage() {
   const [listing, setListing] =
     useState<Listing | null>(null);
 
+  const [images, setImages] =
+    useState<ListingImage[]>([]);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -42,9 +49,11 @@ export default function EditListingPage() {
   useEffect(() => {
     async function loadListing() {
       try {
-        const data = await getListing(listingId);
+        const data =
+          await getListing(listingId);
 
         setListing(data);
+        setImages(data.images ?? []);
       } catch (error) {
         setError(
           error instanceof Error
@@ -60,7 +69,8 @@ export default function EditListingPage() {
   }, [listingId]);
 
   async function handleUpdate(
-    payload: ListingPayload
+    payload: ListingPayload,
+    _newImages: File[]
   ) {
     await updateListing(
       listingId,
@@ -75,10 +85,9 @@ export default function EditListingPage() {
       <Navbar />
 
       <main className="mx-auto max-w-3xl px-6 py-10">
-
         <Link
           href="/landlord"
-          className="text-sm text-gray-600"
+          className="text-sm text-gray-600 hover:text-gray-900"
         >
           ← Back to Dashboard
         </Link>
@@ -87,8 +96,12 @@ export default function EditListingPage() {
           Edit Property
         </h1>
 
+        <p className="mt-2 text-gray-600">
+          Update the property details and manage its photos.
+        </p>
+
         {loading ? (
-          <p className="mt-8">
+          <p className="mt-8 text-gray-500">
             Loading property...
           </p>
         ) : error ? (
@@ -96,35 +109,37 @@ export default function EditListingPage() {
             {error}
           </p>
         ) : listing ? (
-
-          <div className="mt-8 rounded-xl border bg-white p-6">
-
-            <ListingForm
-              initialValues={{
-                title: listing.title,
-                description: listing.description,
-                location: listing.location,
-                monthly_rent:
-                  listing.monthly_rent,
-                bedrooms:
-                  listing.bedrooms,
-                bathrooms:
-                  listing.bathrooms,
-                image_url:
-                  listing.image_url,
-                amenities:
-                  listing.amenities,
-                is_available: 
-                  listing.is_available,
-              }}
-              submitLabel="Save Changes"
-              onSubmit={handleUpdate}
+          <div className="mt-8 space-y-8">
+            <ExistingListingImages
+              listingId={listing.id}
+              images={images}
+              onImagesChange={setImages}
             />
 
+            <div className="rounded-xl border border-gray-200 bg-white p-6">
+              <ListingForm
+                initialValues={{
+                  title: listing.title,
+                  description:
+                    listing.description ?? "",
+                  location: listing.location,
+                  monthly_rent:
+                    listing.monthly_rent,
+                  bedrooms:
+                    listing.bedrooms,
+                  bathrooms:
+                    listing.bathrooms,
+                  amenities:
+                    listing.amenities ?? [],
+                  is_available:
+                    listing.is_available,
+                }}
+                submitLabel="Save Changes"
+                onSubmit={handleUpdate}
+              />
+            </div>
           </div>
-
         ) : null}
-
       </main>
     </>
   );

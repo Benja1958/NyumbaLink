@@ -4,6 +4,8 @@ import { Bath, Bed, Check, MapPin, X } from "lucide-react";
 
 import { Listing } from "@/types/listing";
 
+import AdminImageGallery from "@/components/AdminImageGallery";
+
 type AdminListingCardProps = {
   listing: Listing;
 
@@ -39,10 +41,10 @@ export default function AdminListingCard({
 
   return (
     <article className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-      <img
-        src={listing.image_url}
-        alt={listing.title}
-        className="h-48 w-full object-cover"
+      <AdminImageGallery
+        images={listing.images ?? []}
+        fallbackImage={listing.image_url}
+        title={listing.title}
       />
 
       <div className="p-5">
