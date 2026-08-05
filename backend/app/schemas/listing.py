@@ -24,8 +24,6 @@ class ListingUpdate(BaseModel):
     image_url: Optional[str] = None
     amenities: Optional[List[str]] = None
     is_available: Optional[bool] = None
-    approval_status: Optional[str] = None
-    is_approved: Optional[bool] = None
 
 class ListingResponse(BaseModel):
     id: int
@@ -43,7 +41,15 @@ class ListingResponse(BaseModel):
     is_approved: bool
     approval_status: str
     created_at: datetime
+    rejection_reason: Optional[str] = None
+    rejected_at: Optional[datetime] = None
+    rejected_by: Optional[int] = None
 
     class Config:
         from_attributes = True
 
+class ListingRejectRequest(BaseModel):
+    reason: str = Field(
+        min_length=5,
+        max_length=1000,
+    )

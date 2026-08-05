@@ -50,3 +50,40 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def ensure_listing_rejection_columns():
+    inspector = inspect(engine)
+
+    columns = {
+        column["name"]
+        for column in inspector.get_columns("listings")
+    }
+
+    statements = []
+
+    if "rejection_reason" not in columns:
+        statements.append(
+            "ALTER TABLE listings "
+            "ADD COLUMN rejection_reason TEXT"
+        )
+
+    if "rejected_at" not in columns:
+        statements.append(
+            "ALTER TABLE listings "
+            "ADD COLUMN rejected_at TIMESTAMP WITH TIME ZONE"
+        )
+
+    if "rejected_by" not in columns:
+        statements.append(
+            "ALTER TABLE listings "
+            "ADD COLUMN rejected_by INTEGER "
+            "REFERENCES users(id)"
+        )
+
+    if not statements:
+        return
+
+    with engine.begin() as connection:
+        for statement in statements:
+            connection.execute(text(statement))

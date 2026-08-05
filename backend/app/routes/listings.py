@@ -165,3 +165,47 @@ def get_listing(
 
     return listing
 
+
+@router.patch(
+    "/{listing_id}/resubmit",
+    response_model=ListingResponse,
+)
+def resubmit_listing(
+    listing_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_landlord),
+):
+    listing = (
+        db.query(Listing)
+        .filter(Listing.id == listing_id)
+        .first()
+    )
+
+    if not listing:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Listing not found",
+        )
+
+    if listing.landlord_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot modify this listing",
+        )
+
+    if listing.approval_status != "rejected":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only rejected listings can be resubmitted",
+        )
+
+    listing.approval_status = "pending"
+    listing.is_approved = False
+    listing.rejection_reason = None
+    listing.rejected_at = None
+    listing.rejected_by = None
+
+    db.commit()
+    db.refresh(listing)
+
+    return listing

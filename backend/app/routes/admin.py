@@ -11,7 +11,10 @@ from app.models.user import User
 from app.models.report import Report
 
 from app.schemas.report import AdminReportResponse
-from app.schemas.listing import ListingResponse
+from app.schemas.listing import (
+    ListingRejectRequest,
+    ListingResponse,
+)
 
 
 router = APIRouter()
@@ -53,7 +56,9 @@ def approve_listing(
 
     listing.approval_status = "approved"
     listing.is_approved = True
-    listing.is_available = True
+    listing.rejection_reason = None
+    listing.rejected_by = None
+    listing.rejected_at = None
 
     db.commit()
     db.refresh(listing)
@@ -61,13 +66,21 @@ def approve_listing(
     return listing
 
 
-@router.patch("/listings/{listing_id}/reject", response_model=ListingResponse)
+@router.patch(
+    "/listings/{listing_id}/reject",
+    response_model=ListingResponse,
+)
 def reject_listing(
     listing_id: int,
+    rejection_data: ListingRejectRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin),
 ):
-    listing = db.query(Listing).filter(Listing.id == listing_id).first()
+    listing = (
+        db.query(Listing)
+        .filter(Listing.id == listing_id)
+        .first()
+    )
 
     if not listing:
         raise HTTPException(
@@ -77,7 +90,13 @@ def reject_listing(
 
     listing.approval_status = "rejected"
     listing.is_approved = False
-    listing.is_available = False
+    listing.rejection_reason = (
+        rejection_data.reason.strip()
+    )
+    listing.rejected_by = current_user.id
+    listing.rejected_at = datetime.now(
+        timezone.utc
+    )
 
     db.commit()
     db.refresh(listing)

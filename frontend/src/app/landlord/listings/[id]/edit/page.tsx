@@ -20,6 +20,7 @@ import { getListing } from "@/lib/api";
 
 import {
   ListingPayload,
+  resubmitListing,
   updateListing,
 } from "@/lib/landlordListings";
 
@@ -45,6 +46,9 @@ export default function EditListingPage() {
 
   const [error, setError] =
     useState("");
+
+  const [resubmitting, setResubmitting] =
+    useState(false);
 
   useEffect(() => {
     async function loadListing() {
@@ -80,6 +84,27 @@ export default function EditListingPage() {
     router.push("/landlord");
   }
 
+  async function handleResubmit() {
+    try {
+      setResubmitting(true);
+      setError("");
+
+      const updated =
+        await resubmitListing(listingId);
+
+      setListing(updated);
+      router.push("/landlord");
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to resubmit listing"
+      );
+    } finally {
+      setResubmitting(false);
+    }
+  }
+
   return (
     <>
       <Navbar />
@@ -104,12 +129,48 @@ export default function EditListingPage() {
           <p className="mt-8 text-gray-500">
             Loading property...
           </p>
-        ) : error ? (
+        ) : error && !listing ? (
           <p className="mt-8 text-red-600">
             {error}
           </p>
         ) : listing ? (
           <div className="mt-8 space-y-8">
+            {listing.approval_status ===
+              "rejected" && (
+              <div className="rounded-xl border border-red-200 bg-red-50 p-5">
+                <h2 className="font-semibold text-red-900">
+                  Listing rejected
+                </h2>
+
+                <p className="mt-2 text-sm text-red-700">
+                  {listing.rejection_reason ||
+                    "No rejection reason was provided."}
+                </p>
+
+                <p className="mt-3 text-sm text-red-700">
+                  Update the property details or photos, save your changes,
+                  then resubmit the listing for review.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={handleResubmit}
+                  disabled={resubmitting}
+                  className="mt-4 rounded-lg bg-red-700 px-5 py-3 font-medium text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {resubmitting
+                    ? "Resubmitting..."
+                    : "Resubmit for Review"}
+                </button>
+              </div>
+            )}
+
+            {error && (
+              <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                {error}
+              </p>
+            )}
+
             <ExistingListingImages
               listingId={listing.id}
               images={images}

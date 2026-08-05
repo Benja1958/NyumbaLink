@@ -150,3 +150,30 @@ export async function deleteListing(
     );
   }
 }
+
+export async function resubmitListing(
+  listingId: number
+): Promise<Listing> {
+  const token = getToken();
+
+  const response = await fetch(
+    `${API_URL}/listings/${listingId}/resubmit`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      await getErrorMessage(
+        response,
+        "Failed to resubmit listing"
+      )
+    );
+  }
+
+  return response.json();
+}

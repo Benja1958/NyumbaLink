@@ -6,6 +6,7 @@ from app.database import (
     Base,
     engine,
     ensure_listing_approval_status_column,
+    ensure_listing_rejection_columns,
 )
 
 # Import models so SQLAlchemy registers all tables before create_all()
@@ -30,6 +31,7 @@ from app.routes import (
 
 
 Base.metadata.create_all(bind=engine)
+ensure_listing_rejection_columns()
 ensure_listing_approval_status_column()
 
 

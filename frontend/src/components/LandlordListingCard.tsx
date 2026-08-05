@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Bath, Bed, MapPin, Pencil, Trash2 } from "lucide-react";
+import {
+  Bath,
+  Bed,
+  MapPin,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 
 import { Listing } from "@/types/listing";
 
@@ -16,23 +22,6 @@ export default function LandlordListingCard({
   onDelete,
   deleting = false,
 }: LandlordListingCardProps) {
-  const approvalStatus =
-    listing.approval_status ?? (listing.is_approved ? "approved" : "pending");
-
-  const approvalLabel =
-    approvalStatus === "approved"
-      ? "Approved"
-      : approvalStatus === "rejected"
-        ? "Rejected"
-        : "Pending";
-
-  const approvalClasses =
-    approvalStatus === "approved"
-      ? "bg-green-100 text-green-700"
-      : approvalStatus === "rejected"
-        ? "bg-red-100 text-red-700"
-        : "bg-amber-100 text-amber-700";
-
   const coverImage =
     listing.images?.find(
       (image) => image.is_cover
@@ -57,16 +46,40 @@ export default function LandlordListingCard({
 
             <div className="mt-1 flex items-center gap-1 text-sm text-gray-500">
               <MapPin className="h-4 w-4 shrink-0" />
-              <span className="truncate">{listing.location}</span>
+              <span className="truncate">
+                {listing.location}
+              </span>
             </div>
           </div>
 
           <div className="flex shrink-0 flex-wrap justify-end gap-2">
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-medium ${approvalClasses}`}
-            >
-              {approvalLabel}
-            </span>
+            {listing.approval_status ===
+              "approved" && (
+              <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                Approved
+              </span>
+            )}
+
+            {listing.approval_status ===
+              "pending" && (
+              <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
+                Pending
+              </span>
+            )}
+
+            {listing.approval_status ===
+              "rejected" && (
+              <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
+                Rejected
+              </span>
+            )}
+
+            {listing.approval_status ===
+              "suspended" && (
+              <span className="rounded-full bg-gray-200 px-3 py-1 text-xs font-medium text-gray-700">
+                Suspended
+              </span>
+            )}
 
             {listing.is_available ? (
               <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
@@ -79,6 +92,17 @@ export default function LandlordListingCard({
             )}
           </div>
         </div>
+
+        {listing.approval_status ===
+          "rejected" &&
+          listing.rejection_reason && (
+            <div className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              <span className="font-medium">
+                Rejection reason:
+              </span>{" "}
+              {listing.rejection_reason}
+            </div>
+          )}
 
         <div className="mt-4 flex gap-5 text-sm text-gray-600">
           <span className="flex items-center gap-1">
@@ -94,10 +118,13 @@ export default function LandlordListingCard({
 
         <div className="mt-4">
           <span className="text-xl font-bold text-green-800">
-            KES {listing.monthly_rent.toLocaleString()}
+            KES{" "}
+            {listing.monthly_rent.toLocaleString()}
           </span>
 
-          <span className="text-sm text-gray-500">/month</span>
+          <span className="text-sm text-gray-500">
+            /month
+          </span>
         </div>
 
         <div className="mt-5 flex gap-3 border-t border-gray-100 pt-4">
@@ -112,11 +139,15 @@ export default function LandlordListingCard({
           <button
             type="button"
             disabled={deleting}
-            onClick={() => onDelete(listing.id)}
+            onClick={() =>
+              onDelete(listing.id)
+            }
             className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Trash2 className="h-4 w-4" />
-            {deleting ? "Deleting..." : "Delete"}
+            {deleting
+              ? "Deleting..."
+              : "Delete"}
           </button>
         </div>
       </div>
