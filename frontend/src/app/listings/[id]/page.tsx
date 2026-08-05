@@ -9,6 +9,7 @@ import {
 
 import MessageLandlordButton from "@/components/MessageLandlordButton";
 import FavoriteButton from "@/components/FavoriteButton";
+import ReportListingButton from "@/components/ReportListingButton";
 
 import { getListing } from "@/lib/api";
 
@@ -126,7 +127,14 @@ export default async function ListingPage({ params }: ListingPageProps) {
             </p>
 
             <div className="mt-6">
-              <MessageLandlordButton listingId={property.id} />
+              <MessageLandlordButton listingId={property.id} 
+              />
+            </div>
+            
+            <div className="mt-5 border-t border-gray-200 pt-5">
+              <ReportListingButton
+                listingId={property.id}
+              />
             </div>
           </div>
         </aside>

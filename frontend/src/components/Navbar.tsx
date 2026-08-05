@@ -69,12 +69,21 @@ export default function Navbar() {
               )}
 
               {user.role === "admin" && (
-                <Link
-                  href="/admin"
-                  className="text-sm font-medium text-gray-700 hover:text-gray-950"
-                >
-                  Admin Dashboard
-                </Link>
+                <>
+                  <Link
+                    href="/admin"
+                    className="text-sm font-medium text-gray-700 hover:text-gray-950"
+                  >
+                    Listings
+                  </Link>
+
+                  <Link
+                    href="/admin/reports"
+                    className="text-sm font-medium text-gray-700 hover:text-gray-950"
+                  >
+                    Reports
+                  </Link>
+                </>
               )}
 
               {(user.role === "tenant" ||
