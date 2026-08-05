@@ -21,6 +21,10 @@ export type Listing = {
   amenities: string[];
   is_available: boolean;
   is_approved: boolean;
-  approval_status: "pending" | "approved" | "rejected";
+  approval_status: string;
+  rejection_reason?: string | null;
+  rejected_at?: string | null;
+  rejected_by?: number | null;
   created_at: string;
+  
 };

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text, JSON, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-
+from sqlalchemy import Text
 from app.database import Base
 
 
@@ -53,4 +53,20 @@ class Listing(Base):
         "Report",
         back_populates="listing",
         cascade="all, delete-orphan",
+    )
+
+    rejection_reason = Column(
+        Text,
+        nullable=True,
+    )
+
+    rejected_at = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    rejected_by = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=True,
     )
