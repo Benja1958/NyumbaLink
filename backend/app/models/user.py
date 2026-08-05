@@ -43,3 +43,16 @@ class User(Base):
         foreign_keys="Message.sender_id",
         back_populates="sender",
     )
+
+    submitted_reports = relationship(
+        "Report",
+        foreign_keys="Report.reporter_id",
+        back_populates="reporter",
+        cascade="all, delete-orphan",
+    )
+
+    reviewed_reports = relationship(
+        "Report",
+        foreign_keys="Report.reviewed_by",
+        back_populates="reviewer",
+    )

@@ -15,6 +15,7 @@ from app.models import (
     Favorite,
     Conversation,
     Message,
+    report,
 )
 
 from app.routes import (
@@ -24,6 +25,7 @@ from app.routes import (
     favorites,
     messages,
     images,
+    reports,
 )
 
 
@@ -98,4 +100,10 @@ app.include_router(
     images.router,
     prefix="/listings",
     tags=["Listing Images"],
+)
+
+app.include_router(
+    reports.router,
+    prefix="/reports",
+    tags=["Reports"],
 )

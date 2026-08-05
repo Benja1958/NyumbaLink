@@ -4,3 +4,4 @@ from app.models.favorite import Favorite
 from app.models.conversation import Conversation
 from app.models.message import Message
 from app.models.listing_image import ListingImage
+from app.models.report import Report
