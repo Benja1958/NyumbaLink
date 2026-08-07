@@ -6,6 +6,14 @@ export type Message = {
   sender_id: number;
   content: string;
   created_at: string;
+  read_at: string | null;
+};
+
+export type LatestMessage = {
+  id: number;
+  sender_id: number;
+  content: string;
+  created_at: string;
 };
 
 export type Participant = {
@@ -33,12 +41,17 @@ export type Conversation = {
   listing: ConversationListing;
   tenant: Participant;
   landlord: Participant;
+
+  latest_message: LatestMessage | null;
+  unread_count: number;
 };
 
 export type ConversationWithMessages =
   Conversation & {
     messages: Message[];
   };
+
+export const MESSAGE_POLL_INTERVAL = 5000;
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??

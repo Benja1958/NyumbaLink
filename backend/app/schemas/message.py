@@ -1,6 +1,8 @@
 from datetime import datetime
-from pydantic import BaseModel, Field
 from typing import Optional
+
+from pydantic import BaseModel, Field
+
 from app.schemas.listing_image import ListingImageResponse
 
 
@@ -34,9 +36,21 @@ class ConversationListingResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class MessageResponse(BaseModel):
     id: int
     conversation_id: int
+    sender_id: int
+    content: str
+    created_at: datetime
+    read_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class LatestMessageResponse(BaseModel):
+    id: int
     sender_id: int
     content: str
     created_at: datetime
@@ -56,6 +70,12 @@ class ConversationResponse(BaseModel):
     tenant: ParticipantResponse
     landlord: ParticipantResponse
 
+    latest_message: Optional[
+        LatestMessageResponse
+    ] = None
+
+    unread_count: int = 0
+
     class Config:
         from_attributes = True
 
@@ -63,4 +83,6 @@ class ConversationResponse(BaseModel):
 class ConversationWithMessagesResponse(
     ConversationResponse
 ):
-    messages: list[MessageResponse] = []
+    messages: list[MessageResponse] = Field(
+        default_factory=list
+    )

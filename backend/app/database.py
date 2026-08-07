@@ -42,16 +42,6 @@ def ensure_listing_approval_status_column():
     finally:
         db.close()
 
-
-def get_db():
-    db = SessionLocal()
-
-    try:
-        yield db
-    finally:
-        db.close()
-
-
 def ensure_listing_rejection_columns():
     inspector = inspect(engine)
 
@@ -87,3 +77,34 @@ def ensure_listing_rejection_columns():
     with engine.begin() as connection:
         for statement in statements:
             connection.execute(text(statement))
+            
+def ensure_message_read_at_column():
+    inspector = inspect(engine)
+
+    columns = {
+        column["name"]
+        for column in inspector.get_columns(
+            "messages"
+        )
+    }
+
+    if "read_at" in columns:
+        return
+
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "ALTER TABLE messages "
+                "ADD COLUMN read_at "
+                "TIMESTAMP WITH TIME ZONE"
+            )
+        )
+
+
+def get_db():
+    db = SessionLocal()
+
+    try:
+        yield db
+    finally:
+        db.close()
