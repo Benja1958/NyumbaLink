@@ -6,6 +6,8 @@ import ImageUploader from "@/components/ImageUploader";
 
 import { ListingPayload } from "@/lib/landlordListings";
 
+import { toast } from "sonner";
+
 type ListingFormProps = {
   initialValues?: Partial<ListingPayload>;
   submitLabel: string;
@@ -97,11 +99,12 @@ export default function ListingForm({
         images
       );
     } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Something went wrong"
-      );
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Something went wrong";
+
+    toast.error(message);
     } finally {
       setLoading(false);
     }

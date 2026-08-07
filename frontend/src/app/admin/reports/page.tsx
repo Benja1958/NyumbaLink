@@ -16,6 +16,8 @@ import {
 
 import Navbar from "@/components/Navbar";
 
+import { toast } from "sonner";
+
 import Link from "next/link";
 
 import {
@@ -92,8 +94,10 @@ export default function AdminReportsPage() {
         await dismissReport(reportId);
 
       updateReportInState(updatedReport);
+
+      toast.success("Report dismissed");
     } catch (error) {
-      setError(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Failed to dismiss report"
@@ -124,8 +128,10 @@ export default function AdminReportsPage() {
         );
 
       updateReportInState(updatedReport);
+
+      toast.success("Listing suspended");
     } catch (error) {
-      setError(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Failed to suspend listing"

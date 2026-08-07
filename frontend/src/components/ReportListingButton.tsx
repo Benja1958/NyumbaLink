@@ -18,6 +18,8 @@ import {
   ReportReason,
 } from "@/lib/reports";
 
+import { toast } from "sonner";
+
 type ReportListingButtonProps = {
   listingId: number;
 };
@@ -58,7 +60,9 @@ export default function ReportListingButton({
       setDetails("");
     }
 
-    setError("");
+    toast.success(
+      "Report submitted"
+    );
   }
 
   async function handleSubmit(
@@ -88,7 +92,7 @@ export default function ReportListingButton({
 
       setSubmitted(true);
     } catch (error) {
-      setError(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Failed to report listing"

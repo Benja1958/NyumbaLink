@@ -10,12 +10,15 @@ import LandlordListingCard from "@/components/LandlordListingCard";
 
 import { deleteListing, getMyListings } from "@/lib/landlordListings";
 
+import { toast } from "sonner";
+
 import { Listing } from "@/types/listing";
 import { useAuth } from "@/context/AuthContext";
 import {
   confirmListingAvailability,
   markListingAsRented,
 } from "@/lib/landlordListings";
+
 export default function LandlordPage() {
   const { user } = useAuth();
 
@@ -95,6 +98,7 @@ export default function LandlordPage() {
       await confirmListingAvailability(
         listingId
       );
+      toast.success("Availability confirmed");
 
     setListings((current) =>
       current.map((listing) =>
@@ -104,6 +108,11 @@ export default function LandlordPage() {
       )
     );
   } catch (error) {
+    toast.error(
+      error instanceof Error
+        ? error.message
+        : "Failed to confirm availability"
+    );
     console.error(error);
   } finally {
     setAvailabilityUpdatingId(null);
@@ -128,6 +137,10 @@ export default function LandlordPage() {
         await markListingAsRented(
           listingId
         );
+      
+      toast.success(
+        "Property marked as rented"
+      );
 
       setListings((current) =>
         current.map((listing) =>

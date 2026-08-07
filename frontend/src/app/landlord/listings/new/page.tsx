@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import ListingForm from "@/components/ListingForm";
 import Navbar from "@/components/Navbar";
+import { toast } from "sonner";
 
 import {
   createListing,
@@ -28,6 +29,9 @@ export default function NewListingPage() {
     await uploadListingImages(
       listing.id,
       images
+    );
+    toast.success(
+      "Property created successfully"
     );
 
     router.push("/landlord");

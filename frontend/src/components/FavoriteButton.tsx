@@ -1,7 +1,11 @@
 "use client";
 
 import { Heart } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+import { toast } from "sonner";
 
 import {
   addFavorite,
@@ -16,13 +20,19 @@ type FavoriteButtonProps = {
 export default function FavoriteButton({
   listingId,
 }: FavoriteButtonProps) {
-  const [isFavorited, setIsFavorited] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isFavorited, setIsFavorited] =
+    useState(false);
+
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
     async function loadStatus() {
       try {
-        const status = await getFavoriteStatus(listingId);
+        const status =
+          await getFavoriteStatus(
+            listingId
+          );
 
         setIsFavorited(status);
       } catch {
@@ -37,20 +47,40 @@ export default function FavoriteButton({
   }, [listingId]);
 
   async function handleClick() {
-    if (loading) return;
+    if (loading) {
+      return;
+    }
 
     try {
       setLoading(true);
 
       if (isFavorited) {
-        await removeFavorite(listingId);
+        await removeFavorite(
+          listingId
+        );
+
         setIsFavorited(false);
+
+        toast.success(
+          "Removed from favorites"
+        );
       } else {
-        await addFavorite(listingId);
+        await addFavorite(
+          listingId
+        );
+
         setIsFavorited(true);
+
+        toast.success(
+          "Added to favorites"
+        );
       }
     } catch (error) {
-      console.error(error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to update favorites"
+      );
     } finally {
       setLoading(false);
     }
@@ -61,7 +91,7 @@ export default function FavoriteButton({
       type="button"
       onClick={handleClick}
       disabled={loading}
-      className="rounded-full bg-white p-2 shadow disabled:opacity-50"
+      className="rounded-full bg-white p-2 shadow disabled:cursor-not-allowed disabled:opacity-50"
       aria-label={
         isFavorited
           ? "Remove from favorites"
