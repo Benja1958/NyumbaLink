@@ -42,6 +42,11 @@ class Message(Base):
         server_default=func.now(),
     )
 
+    read_at = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
     conversation = relationship(
         "Conversation",
         back_populates="messages",

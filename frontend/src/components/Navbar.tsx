@@ -9,6 +9,7 @@ import {
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 export default function Navbar() {
   const {
@@ -17,6 +18,20 @@ export default function Navbar() {
     isAuthenticated,
     logout,
   } = useAuth();
+
+  const messagingEnabled =
+    isAuthenticated &&
+    !!user &&
+    (
+      user.role === "tenant" ||
+      user.role === "landlord"
+    );
+
+  const {
+    unreadCount,
+  } = useUnreadMessages({
+    enabled: messagingEnabled,
+  });
 
   const router = useRouter();
 
@@ -88,17 +103,30 @@ export default function Navbar() {
 
               {(user.role === "tenant" ||
                 user.role === "landlord") && (
-                <Link
-                  href={
-                    user.role === "tenant"
-                      ? "/tenant/messages"
-                      : "/landlord/messages"
-                  }
-                  className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-950"
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  Messages
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={
+                      user.role === "tenant"
+                        ? "/tenant/messages"
+                        : "/landlord/messages"
+                    }
+                    className="relative flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-950"
+                  >
+                    <span className="relative">
+                      <MessageSquare className="h-5 w-5" />
+
+                      {unreadCount > 0 && (
+                        <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
+                          {unreadCount > 99
+                            ? "99+"
+                            : unreadCount}
+                        </span>
+                      )}
+                    </span>
+
+                    Messages
+                  </Link>
+                </div>
               )}
 
               <span className="text-sm text-gray-600">

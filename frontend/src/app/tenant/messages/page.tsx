@@ -13,6 +13,7 @@ import ConversationCard from "@/components/ConversationCard";
 import {
   Conversation,
   getConversations,
+  MESSAGE_POLL_INTERVAL,
 } from "@/lib/messages";
 
 export default function TenantMessagesPage() {
@@ -26,24 +27,42 @@ export default function TenantMessagesPage() {
     useState("");
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadConversations() {
       try {
-        const data =
-          await getConversations();
+        const data = await getConversations();
 
-        setConversations(data);
+        if (isMounted) {
+          setConversations(data);
+          setError("");
+        }
       } catch (error) {
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Failed to load conversations"
-        );
+        if (isMounted) {
+          setError(
+            error instanceof Error
+              ? error.message
+              : "Failed to load conversations"
+          );
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
 
     loadConversations();
+
+    const interval = setInterval(
+      loadConversations,
+      MESSAGE_POLL_INTERVAL
+    );
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   return (
