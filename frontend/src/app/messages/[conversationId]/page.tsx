@@ -14,6 +14,7 @@ import {
 
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/context/AuthContext";
+import ConversationPageSkeleton from "@/components/ConversationPageSkeleton";
 
 import {
   ConversationWithMessages,
@@ -164,12 +165,7 @@ export default function ConversationPage() {
     return (
       <>
         <Navbar />
-
-        <main className="mx-auto max-w-3xl px-6 py-10">
-          <p className="text-gray-500">
-            Loading conversation...
-          </p>
-        </main>
+        <ConversationPageSkeleton />
       </>
     );
   }

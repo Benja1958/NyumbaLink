@@ -9,6 +9,7 @@ import { MessageSquare } from "lucide-react";
 
 import Navbar from "@/components/Navbar";
 import ConversationCard from "@/components/ConversationCard";
+import ConversationCardSkeleton from "@/components/ConversationCardSkeleton";
 
 import {
   Conversation,
@@ -81,9 +82,11 @@ export default function TenantMessagesPage() {
         </div>
 
         {loading ? (
-          <p className="mt-10 text-gray-500">
-            Loading conversations...
-          </p>
+          <div className="mt-8 space-y-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <ConversationCardSkeleton key={index} />
+            ))}
+          </div>
         ) : error ? (
           <p className="mt-10 text-red-600">
             {error}
