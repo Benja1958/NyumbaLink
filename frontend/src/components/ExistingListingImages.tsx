@@ -13,6 +13,8 @@ import ImageUploader from "@/components/ImageUploader";
 
 import { ListingImage } from "@/types/listing";
 
+import { toast } from "sonner";
+
 import {
   deleteListingImage,
   setListingCoverImage,
@@ -84,15 +86,15 @@ export default function ExistingListingImages({
       ]);
 
       setNewFiles([]);
-      setSuccess(
-        `${uploadedImages.length} photo${
-          uploadedImages.length === 1
-            ? ""
-            : "s"
-        } uploaded successfully`
-      );
+      toast.success(
+      `${uploadedImages.length} photo${
+        uploadedImages.length === 1
+          ? ""
+          : "s"
+      } uploaded successfully`
+    );
     } catch (error) {
-      setError(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Failed to upload images"
@@ -158,11 +160,11 @@ export default function ExistingListingImages({
       }
 
       onImagesChange(updatedImages);
-      setSuccess(
+      toast.success(
         "Photo deleted successfully"
       );
     } catch (error) {
-      setError(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Failed to delete image"
@@ -193,11 +195,11 @@ export default function ExistingListingImages({
         }))
       );
 
-      setSuccess(
-        "Cover photo updated successfully"
+      toast.success(
+        "Cover photo updated"
       );
     } catch (error) {
-      setError(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Failed to set cover image"

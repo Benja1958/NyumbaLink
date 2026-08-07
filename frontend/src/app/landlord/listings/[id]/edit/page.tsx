@@ -18,6 +18,8 @@ import ExistingListingImages from "@/components/ExistingListingImages";
 
 import { getListing } from "@/lib/api";
 
+import { toast } from "sonner";
+
 import {
   ListingPayload,
   resubmitListing,
@@ -81,6 +83,10 @@ export default function EditListingPage() {
       payload
     );
 
+    toast.success(
+      "Property updated successfully"
+    );
+
     router.push("/landlord");
   }
 
@@ -93,9 +99,14 @@ export default function EditListingPage() {
         await resubmitListing(listingId);
 
       setListing(updated);
+
+      toast.success(
+        "Listing resubmitted for review"
+      );
+
       router.push("/landlord");
     } catch (error) {
-      setError(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Failed to resubmit listing"

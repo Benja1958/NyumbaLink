@@ -16,6 +16,8 @@ import {
 
 import { Listing } from "@/types/listing";
 
+import { toast } from "sonner";
+
 export default function AdminPage() {
   const [listings, setListings] =
     useState<Listing[]>([]);
@@ -63,6 +65,10 @@ export default function AdminPage() {
           (listing) =>
             listing.id !== listingId
         )
+      );
+
+      toast.success(
+        "Listing approved"
       );
     } catch (error) {
       alert(
