@@ -90,6 +90,31 @@ export default async function ListingPage({ params }: ListingPageProps) {
             </div>
           </div>
 
+          <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-5">
+            <p className="font-medium text-green-900">
+              {property.is_available
+                ? "Available"
+                : "Currently unavailable"}
+            </p>
+
+            {property.is_available &&
+              property.last_availability_confirmed_at && (
+                <p className="mt-1 text-sm text-green-700">
+                  Availability confirmed{" "}
+                  {formatAvailabilityTime(
+                    property.last_availability_confirmed_at
+                  )}
+                </p>
+              )}
+
+            {property.is_available &&
+              !property.last_availability_confirmed_at && (
+                <p className="mt-1 text-sm text-gray-600">
+                  Availability has not been confirmed recently.
+                </p>
+              )}
+          </div>
+
           <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6">
             <h2 className="text-xl font-semibold">Description</h2>
 
@@ -141,4 +166,41 @@ export default async function ListingPage({ params }: ListingPageProps) {
       </div>
     </main>
   );
+}
+
+function formatAvailabilityTime(
+  value: string
+): string {
+  const date = new Date(value);
+  const now = new Date();
+
+  const differenceInMs =
+    now.getTime() - date.getTime();
+
+  const differenceInDays = Math.floor(
+    differenceInMs /
+      (1000 * 60 * 60 * 24)
+  );
+
+  if (differenceInDays <= 0) {
+    return "today";
+  }
+
+  if (differenceInDays === 1) {
+    return "yesterday";
+  }
+
+  if (differenceInDays < 7) {
+    return `${differenceInDays} days ago`;
+  }
+
+  const weeks = Math.floor(
+    differenceInDays / 7
+  );
+
+  if (weeks === 1) {
+    return "1 week ago";
+  }
+
+  return `${weeks} weeks ago`;
 }

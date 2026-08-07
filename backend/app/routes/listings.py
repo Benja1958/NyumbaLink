@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from datetime import datetime, timezone
 
 from app.database import get_db
 from app.models.listing import Listing
@@ -204,6 +205,80 @@ def resubmit_listing(
     listing.rejection_reason = None
     listing.rejected_at = None
     listing.rejected_by = None
+
+    db.commit()
+    db.refresh(listing)
+
+    return listing
+
+
+@router.patch(
+    "/{listing_id}/confirm-availability",
+    response_model=ListingResponse,
+)
+def confirm_listing_availability(
+    listing_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_landlord),
+):
+    listing = (
+        db.query(Listing)
+        .filter(Listing.id == listing_id)
+        .first()
+    )
+
+    if not listing:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Listing not found",
+        )
+
+    if listing.landlord_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot modify this listing",
+        )
+
+    listing.is_available = True
+
+    listing.last_availability_confirmed_at = (
+        datetime.now(timezone.utc)
+    )
+
+    db.commit()
+    db.refresh(listing)
+
+    return listing
+
+
+@router.patch(
+    "/{listing_id}/mark-rented",
+    response_model=ListingResponse,
+)
+def mark_listing_as_rented(
+    listing_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_landlord),
+):
+    listing = (
+        db.query(Listing)
+        .filter(Listing.id == listing_id)
+        .first()
+    )
+
+    if not listing:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Listing not found",
+        )
+
+    if listing.landlord_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot modify this listing",
+        )
+
+    listing.is_available = False
 
     db.commit()
     db.refresh(listing)

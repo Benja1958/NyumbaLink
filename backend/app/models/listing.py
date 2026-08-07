@@ -70,3 +70,8 @@ class Listing(Base):
         ForeignKey("users.id"),
         nullable=True,
     )
+
+    last_availability_confirmed_at = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )

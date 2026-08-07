@@ -177,3 +177,57 @@ export async function resubmitListing(
 
   return response.json();
 }
+
+export async function confirmListingAvailability(
+  listingId: number
+): Promise<Listing> {
+  const token = getToken();
+
+  const response = await fetch(
+    `${API_URL}/listings/${listingId}/confirm-availability`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      await getErrorMessage(
+        response,
+        "Failed to confirm availability"
+      )
+    );
+  }
+
+  return response.json();
+}
+
+export async function markListingAsRented(
+  listingId: number
+): Promise<Listing> {
+  const token = getToken();
+
+  const response = await fetch(
+    `${API_URL}/listings/${listingId}/mark-rented`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      await getErrorMessage(
+        response,
+        "Failed to mark listing as rented"
+      )
+    );
+  }
+
+  return response.json();
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+
 import {
   Bath,
   Bed,
@@ -14,13 +15,19 @@ import { Listing } from "@/types/listing";
 type LandlordListingCardProps = {
   listing: Listing;
   onDelete: (id: number) => void;
+  onConfirmAvailability: (id: number) => void;
+  onMarkRented: (id: number) => void;
   deleting?: boolean;
+  availabilityUpdating?: boolean;
 };
 
 export default function LandlordListingCard({
   listing,
   onDelete,
+  onConfirmAvailability,
+  onMarkRented,
   deleting = false,
+  availabilityUpdating = false,
 }: LandlordListingCardProps) {
   const coverImage =
     listing.images?.find(
@@ -46,6 +53,7 @@ export default function LandlordListingCard({
 
             <div className="mt-1 flex items-center gap-1 text-sm text-gray-500">
               <MapPin className="h-4 w-4 shrink-0" />
+
               <span className="truncate">
                 {listing.location}
               </span>
@@ -127,6 +135,66 @@ export default function LandlordListingCard({
           </span>
         </div>
 
+        {listing.approval_status ===
+          "approved" && (
+            <div className="mt-5 rounded-xl bg-gray-50 p-4">
+              <p className="text-sm font-medium text-gray-900">
+                Availability
+              </p>
+
+              {listing.last_availability_confirmed_at ? (
+                <p className="mt-1 text-xs text-gray-500">
+                  Last confirmed{" "}
+                  {formatAvailabilityTime(
+                    listing.last_availability_confirmed_at
+                  )}
+                </p>
+              ) : (
+                <p className="mt-1 text-xs text-gray-500">
+                  Availability has not been confirmed yet.
+                </p>
+              )}
+
+              <div className="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    onConfirmAvailability(
+                      listing.id
+                    )
+                  }
+                  disabled={
+                    availabilityUpdating ||
+                    !listing.is_available
+                  }
+                  className="flex-1 rounded-lg bg-green-700 px-3 py-2 text-sm font-medium text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {availabilityUpdating
+                    ? "Updating..."
+                    : "Still Available"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    onMarkRented(listing.id)
+                  }
+                  disabled={
+                    availabilityUpdating ||
+                    !listing.is_available
+                  }
+                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {availabilityUpdating
+                    ? "Updating..."
+                    : listing.is_available
+                    ? "Mark as Rented"
+                    : "Rented"}
+                </button>
+              </div>
+            </div>
+          )}
+
         <div className="mt-5 flex gap-3 border-t border-gray-100 pt-4">
           <Link
             href={`/landlord/listings/${listing.id}/edit`}
@@ -145,6 +213,7 @@ export default function LandlordListingCard({
             className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Trash2 className="h-4 w-4" />
+
             {deleting
               ? "Deleting..."
               : "Delete"}
@@ -153,4 +222,41 @@ export default function LandlordListingCard({
       </div>
     </article>
   );
+}
+
+function formatAvailabilityTime(
+  value: string
+): string {
+  const date = new Date(value);
+  const now = new Date();
+
+  const differenceInMs =
+    now.getTime() - date.getTime();
+
+  const differenceInDays = Math.floor(
+    differenceInMs /
+      (1000 * 60 * 60 * 24)
+  );
+
+  if (differenceInDays <= 0) {
+    return "today";
+  }
+
+  if (differenceInDays === 1) {
+    return "yesterday";
+  }
+
+  if (differenceInDays < 7) {
+    return `${differenceInDays} days ago`;
+  }
+
+  const weeks = Math.floor(
+    differenceInDays / 7
+  );
+
+  if (weeks === 1) {
+    return "1 week ago";
+  }
+
+  return `${weeks} weeks ago`;
 }

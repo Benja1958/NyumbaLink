@@ -12,7 +12,10 @@ import { deleteListing, getMyListings } from "@/lib/landlordListings";
 
 import { Listing } from "@/types/listing";
 import { useAuth } from "@/context/AuthContext";
-
+import {
+  confirmListingAvailability,
+  markListingAsRented,
+} from "@/lib/landlordListings";
 export default function LandlordPage() {
   const { user } = useAuth();
 
@@ -22,6 +25,9 @@ export default function LandlordPage() {
   const [error, setError] = useState("");
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const [availabilityUpdatingId, setAvailabilityUpdatingId] =
+    useState<number | null>(null);
 
   useEffect(() => {
     async function loadListings() {
@@ -78,6 +84,64 @@ export default function LandlordPage() {
       (listing.approval_status ??
         (listing.is_approved ? "approved" : "pending")) === "pending",
   ).length;
+
+  async function handleConfirmAvailability(
+  listingId: number
+) {
+  try {
+    setAvailabilityUpdatingId(listingId);
+
+    const updated =
+      await confirmListingAvailability(
+        listingId
+      );
+
+    setListings((current) =>
+      current.map((listing) =>
+        listing.id === listingId
+          ? updated
+          : listing
+      )
+    );
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setAvailabilityUpdatingId(null);
+  }
+}
+
+  async function handleMarkRented(
+    listingId: number
+  ) {
+    const confirmed = window.confirm(
+      "Mark this property as rented?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setAvailabilityUpdatingId(listingId);
+
+      const updated =
+        await markListingAsRented(
+          listingId
+        );
+
+      setListings((current) =>
+        current.map((listing) =>
+          listing.id === listingId
+            ? updated
+            : listing
+        )
+      );
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setAvailabilityUpdatingId(null);
+    }
+  }
 
   return (
     <>
@@ -159,6 +223,13 @@ export default function LandlordPage() {
                   listing={listing}
                   deleting={deletingId === listing.id}
                   onDelete={handleDelete}
+                  onConfirmAvailability={
+                    handleConfirmAvailability
+                  }
+                  onMarkRented={handleMarkRented}
+                  availabilityUpdating={
+                    availabilityUpdatingId === listing.id
+                  }
                 />
               ))}
             </div>
