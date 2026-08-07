@@ -44,6 +44,9 @@ class ListingResponse(BaseModel):
     rejection_reason: Optional[str] = None
     rejected_at: Optional[datetime] = None
     rejected_by: Optional[int] = None
+    last_availability_confirmed_at: Optional[
+        datetime
+    ] = None
 
     class Config:
         from_attributes = True

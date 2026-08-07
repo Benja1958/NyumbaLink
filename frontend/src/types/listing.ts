@@ -26,5 +26,6 @@ export type Listing = {
   rejected_at?: string | null;
   rejected_by?: number | null;
   created_at: string;
+  last_availability_confirmed_at?: string | null;
   
 };

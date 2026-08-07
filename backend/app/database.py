@@ -100,6 +100,32 @@ def ensure_message_read_at_column():
             )
         )
 
+def ensure_listing_availability_confirmation_column():
+    inspector = inspect(engine)
+
+    columns = {
+        column["name"]
+        for column in inspector.get_columns(
+            "listings"
+        )
+    }
+
+    if (
+        "last_availability_confirmed_at"
+        in columns
+    ):
+        return
+
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "ALTER TABLE listings "
+                "ADD COLUMN "
+                "last_availability_confirmed_at "
+                "TIMESTAMP WITH TIME ZONE"
+            )
+        )
+
 
 def get_db():
     db = SessionLocal()
