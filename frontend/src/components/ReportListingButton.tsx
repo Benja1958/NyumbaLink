@@ -47,6 +47,13 @@ export default function ReportListingButton({
   const [submitted, setSubmitted] =
     useState(false);
 
+  function resetForm() {
+    setSubmitted(false);
+    setReason(REPORT_REASONS[0]);
+    setDetails("");
+    setError("");
+  }
+
   function closeModal() {
     if (submitting) {
       return;
@@ -55,14 +62,10 @@ export default function ReportListingButton({
     setIsOpen(false);
 
     if (submitted) {
-      setSubmitted(false);
-      setReason(REPORT_REASONS[0]);
-      setDetails("");
+      resetForm();
+    } else {
+      setError("");
     }
-
-    toast.success(
-      "Report submitted"
-    );
   }
 
   async function handleSubmit(
@@ -91,6 +94,10 @@ export default function ReportListingButton({
       );
 
       setSubmitted(true);
+
+      toast.success(
+        "Report submitted successfully"
+      );
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -106,7 +113,10 @@ export default function ReportListingButton({
     <>
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          resetForm();
+          setIsOpen(true);
+        }}
         className="flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700"
       >
         <Flag className="h-4 w-4" />
@@ -136,8 +146,9 @@ export default function ReportListingButton({
               <button
                 type="button"
                 onClick={closeModal}
+                disabled={submitting}
                 aria-label="Close report form"
-                className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -193,12 +204,14 @@ export default function ReportListingButton({
                   <select
                     id="report-reason"
                     value={reason}
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setReason(
                         event.target
                           .value as ReportReason
-                      )
-                    }
+                      );
+
+                      setError("");
+                    }}
                     className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-green-700"
                   >
                     {REPORT_REASONS.map(
@@ -228,11 +241,15 @@ export default function ReportListingButton({
                   <textarea
                     id="report-details"
                     value={details}
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setDetails(
                         event.target.value
-                      )
-                    }
+                      );
+
+                      if (error) {
+                        setError("");
+                      }
+                    }}
                     maxLength={1000}
                     placeholder="Explain what seems wrong with this listing..."
                     className="h-32 w-full resize-none rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-green-700"
@@ -254,7 +271,7 @@ export default function ReportListingButton({
                     type="button"
                     onClick={closeModal}
                     disabled={submitting}
-                    className="flex-1 rounded-xl border border-gray-300 px-5 py-3 font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    className="flex-1 rounded-xl border border-gray-300 px-5 py-3 font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Cancel
                   </button>
@@ -262,7 +279,7 @@ export default function ReportListingButton({
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 rounded-xl bg-red-600 px-5 py-3 font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                    className="flex-1 rounded-xl bg-red-600 px-5 py-3 font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {submitting
                       ? "Submitting..."
