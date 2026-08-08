@@ -10,6 +10,7 @@ import {
 import MessageLandlordButton from "@/components/MessageLandlordButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import ReportListingButton from "@/components/ReportListingButton";
+import { notFound } from "next/navigation";
 
 import { getListing } from "@/lib/api";
 
@@ -22,7 +23,20 @@ type ListingPageProps = {
 export default async function ListingPage({ params }: ListingPageProps) {
   const { id } = await params;
 
-  const property = await getListing(Number(id));
+  let property;
+
+  try {
+    property = await getListing(Number(id));
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.includes("404")
+    ) {
+      notFound();
+    }
+
+    throw error;
+  }
 
   const approvalStatus =
     property.approval_status ?? (property.is_approved ? "approved" : "pending");
