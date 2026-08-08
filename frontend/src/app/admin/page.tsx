@@ -5,8 +5,15 @@ import {
   useState,
 } from "react";
 
+import {
+  ClipboardCheck,
+} from "lucide-react";
+
+import { toast } from "sonner";
+
 import Navbar from "@/components/Navbar";
 import AdminListingCard from "@/components/AdminListingCard";
+import EmptyState from "@/components/EmptyState";
 
 import {
   approveListing,
@@ -15,8 +22,6 @@ import {
 } from "@/lib/admin";
 
 import { Listing } from "@/types/listing";
-
-import { toast } from "sonner";
 
 export default function AdminPage() {
   const [listings, setListings] =
@@ -71,7 +76,7 @@ export default function AdminPage() {
         "Listing approved"
       );
     } catch (error) {
-      alert(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Failed to approve listing"
@@ -84,9 +89,10 @@ export default function AdminPage() {
   async function handleReject(
     listingId: number
   ) {
-    const confirmed = window.confirm(
-      "Reject this listing?"
-    );
+    const confirmed =
+      window.confirm(
+        "Reject this listing?"
+      );
 
     if (!confirmed) {
       return;
@@ -103,8 +109,12 @@ export default function AdminPage() {
             listing.id !== listingId
         )
       );
+
+      toast.success(
+        "Listing rejected"
+      );
     } catch (error) {
-      alert(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Failed to reject listing"
@@ -119,7 +129,6 @@ export default function AdminPage() {
       <Navbar />
 
       <main className="mx-auto max-w-7xl px-6 py-10">
-
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
             Admin Dashboard
@@ -132,9 +141,7 @@ export default function AdminPage() {
         </div>
 
         <section className="mt-8">
-
           <div className="flex items-center justify-between">
-
             <h2 className="text-xl font-semibold">
               Pending Listings
             </h2>
@@ -144,58 +151,47 @@ export default function AdminPage() {
                 {listings.length} pending
               </span>
             )}
-
           </div>
 
           {loading ? (
-
             <p className="mt-8 text-gray-500">
               Loading pending listings...
             </p>
-
           ) : error ? (
-
             <p className="mt-8 text-red-600">
               {error}
             </p>
-
           ) : listings.length === 0 ? (
-
-            <div className="mt-8 rounded-xl border border-dashed border-gray-300 p-12 text-center">
-
-              <h3 className="font-semibold">
-                No listings waiting for review
-              </h3>
-
-              <p className="mt-2 text-sm text-gray-500">
-                New landlord listings will
-                appear here.
-              </p>
-
+            <div className="mt-10">
+              <EmptyState
+                icon={ClipboardCheck}
+                title="No pending listings"
+                description="All submitted properties have been reviewed. New listings awaiting approval will appear here."
+              />
             </div>
-
           ) : (
-
             <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-
-              {listings.map((listing) => (
-                <AdminListingCard
-                  key={listing.id}
-                  listing={listing}
-                  processing={
-                    processingId === listing.id
-                  }
-                  onApprove={handleApprove}
-                  onReject={handleReject}
-                />
-              ))}
-
+              {listings.map(
+                (listing) => (
+                  <AdminListingCard
+                    key={listing.id}
+                    listing={listing}
+                    processing={
+                      processingId ===
+                      listing.id
+                    }
+                    onApprove={
+                      handleApprove
+                    }
+                    onReject={
+                      handleReject
+                    }
+                  />
+                )
+              )}
             </div>
-
           )}
-
         </section>
-
       </main>
     </>
   );

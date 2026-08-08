@@ -1,6 +1,10 @@
+import { SearchX } from "lucide-react";
+
 import Navbar from "@/components/Navbar";
 import PropertyCard from "@/components/PropertyCard";
 import SearchFilters from "@/components/SearchFilters";
+import EmptyState from "@/components/EmptyState";
+
 import { getListings } from "@/lib/api";
 
 type TenantPageProps = {
@@ -19,7 +23,8 @@ export default async function TenantPage({
   const params = await searchParams;
 
   const listings = await getListings({
-    location: params.location || undefined,
+    location:
+      params.location || undefined,
 
     min_rent: params.min_rent
       ? Number(params.min_rent)
@@ -60,14 +65,14 @@ export default async function TenantPage({
         </p>
 
         {listings.length === 0 ? (
-          <div className="mt-10 rounded-xl border border-dashed border-gray-300 p-10 text-center">
-            <h2 className="text-lg font-semibold">
-              No properties found
-            </h2>
-
-            <p className="mt-2 text-gray-500">
-              Try adjusting your search filters.
-            </p>
+          <div className="mt-10">
+            <EmptyState
+              icon={SearchX}
+              title="No properties found"
+              description="We couldn’t find any properties matching your current filters. Try adjusting your search or clear the filters to see all available listings."
+              actionLabel="Clear Filters"
+              actionHref="/tenant"
+            />
           </div>
         ) : (
           <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

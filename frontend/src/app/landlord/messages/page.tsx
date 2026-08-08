@@ -10,6 +10,7 @@ import { MessageSquare } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import ConversationCard from "@/components/ConversationCard";
 import ConversationCardSkeleton from "@/components/ConversationCardSkeleton";
+import EmptyState from "@/components/EmptyState";
 
 import {
   Conversation,
@@ -32,7 +33,8 @@ export default function LandlordMessagesPage() {
 
     async function loadConversations() {
       try {
-        const data = await getConversations();
+        const data =
+          await getConversations();
 
         if (isMounted) {
           setConversations(data);
@@ -83,25 +85,25 @@ export default function LandlordMessagesPage() {
 
         {loading ? (
           <div className="mt-8 space-y-4">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <ConversationCardSkeleton key={index} />
+            {Array.from({
+              length: 4,
+            }).map((_, index) => (
+              <ConversationCardSkeleton
+                key={index}
+              />
             ))}
           </div>
         ) : error ? (
-          <p className="mt-10 text-red-600">
+          <p className="mt-8 text-red-600">
             {error}
           </p>
         ) : conversations.length === 0 ? (
-          <div className="mt-10 rounded-2xl border border-dashed border-gray-300 px-6 py-16 text-center">
-            <MessageSquare className="mx-auto h-12 w-12 text-gray-300" />
-
-            <h2 className="mt-4 text-lg font-semibold">
-              No tenant enquiries yet
-            </h2>
-
-            <p className="mt-2 text-sm text-gray-500">
-              Conversations will appear here when tenants contact you.
-            </p>
+          <div className="mt-8">
+            <EmptyState
+              icon={MessageSquare}
+              title="No tenant enquiries yet"
+              description="Messages from tenants interested in your properties will appear here."
+            />
           </div>
         ) : (
           <div className="mt-8 space-y-4">

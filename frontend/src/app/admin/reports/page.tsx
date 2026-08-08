@@ -7,18 +7,18 @@ import {
 
 import {
   AlertTriangle,
-  CheckCircle2,
   Clock3,
   MapPin,
   ShieldAlert,
+  ShieldCheck,
   XCircle,
 } from "lucide-react";
 
-import Navbar from "@/components/Navbar";
-
+import Link from "next/link";
 import { toast } from "sonner";
 
-import Link from "next/link";
+import Navbar from "@/components/Navbar";
+import EmptyState from "@/components/EmptyState";
 
 import {
   AdminReport,
@@ -54,11 +54,12 @@ export default function AdminReportsPage() {
         setLoading(true);
         setError("");
 
-        const data = await getAdminReports(
-          filter === "all"
-            ? undefined
-            : filter
-        );
+        const data =
+          await getAdminReports(
+            filter === "all"
+              ? undefined
+              : filter
+          );
 
         setReports(data);
       } catch (error) {
@@ -93,9 +94,13 @@ export default function AdminReportsPage() {
       const updatedReport =
         await dismissReport(reportId);
 
-      updateReportInState(updatedReport);
+      updateReportInState(
+        updatedReport
+      );
 
-      toast.success("Report dismissed");
+      toast.success(
+        "Report dismissed"
+      );
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -127,9 +132,13 @@ export default function AdminReportsPage() {
           reportId
         );
 
-      updateReportInState(updatedReport);
+      updateReportInState(
+        updatedReport
+      );
 
-      toast.success("Listing suspended");
+      toast.success(
+        "Listing suspended"
+      );
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -151,7 +160,8 @@ export default function AdminReportsPage() {
       setReports((current) =>
         current.filter(
           (report) =>
-            report.id !== updatedReport.id
+            report.id !==
+            updatedReport.id
         )
       );
 
@@ -160,7 +170,8 @@ export default function AdminReportsPage() {
 
     setReports((current) =>
       current.map((report) =>
-        report.id === updatedReport.id
+        report.id ===
+        updatedReport.id
           ? updatedReport
           : report
       )
@@ -208,8 +219,9 @@ export default function AdminReportsPage() {
             </h1>
 
             <p className="mt-2 text-gray-600">
-              Review tenant reports and take
-              action on suspicious listings.
+              Review tenant reports and
+              take action on suspicious
+              listings.
             </p>
           </div>
         </div>
@@ -255,17 +267,20 @@ export default function AdminReportsPage() {
             Loading reports...
           </p>
         ) : reports.length === 0 ? (
-          <div className="mt-10 rounded-2xl border border-dashed border-gray-300 px-6 py-16 text-center">
-            <CheckCircle2 className="mx-auto h-12 w-12 text-gray-300" />
-
-            <h2 className="mt-4 text-lg font-semibold text-gray-900">
-              No reports found
-            </h2>
-
-            <p className="mt-2 text-sm text-gray-500">
-              There are no reports matching this
-              status.
-            </p>
+          <div className="mt-10">
+            <EmptyState
+              icon={ShieldCheck}
+              title={
+                filter === "pending"
+                  ? "No reports to review"
+                  : "No reports found"
+              }
+              description={
+                filter === "pending"
+                  ? "There are currently no unresolved listing reports."
+                  : "There are no reports matching this status."
+              }
+            />
           </div>
         ) : (
           <div className="mt-8 space-y-5">
@@ -279,7 +294,8 @@ export default function AdminReportsPage() {
                 statusBadge.icon;
 
               const processing =
-                processingId === report.id;
+                processingId ===
+                report.id;
 
               return (
                 <article
@@ -300,7 +316,10 @@ export default function AdminReportsPage() {
                           className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${statusBadge.className}`}
                         >
                           <StatusIcon className="h-3.5 w-3.5" />
-                          {statusBadge.label}
+
+                          {
+                            statusBadge.label
+                          }
                         </span>
                       </div>
 
@@ -381,56 +400,66 @@ export default function AdminReportsPage() {
 
                   <div className="mt-6 border-t border-gray-200 pt-5">
                     <div className="flex flex-wrap gap-3">
-                        <Link
+                      <Link
                         href={`/listings/${report.listing.id}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex min-w-44 flex-1 items-center justify-center rounded-xl border border-indigo-200 px-5 py-3 font-medium text-indigo-700 hover:bg-indigo-50"
-                        >
+                      >
                         Review Listing
-                        </Link>
+                      </Link>
 
-                        {report.status === "pending" && (
+                      {report.status ===
+                        "pending" && (
                         <>
-                            <button
+                          <button
                             type="button"
-                            disabled={processing}
+                            disabled={
+                              processing
+                            }
                             onClick={() =>
-                                handleDismiss(report.id)
+                              handleDismiss(
+                                report.id
+                              )
                             }
                             className="min-w-44 flex-1 rounded-xl border border-gray-300 px-5 py-3 font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
+                          >
                             {processing
-                                ? "Processing..."
-                                : "Dismiss Report"}
-                            </button>
+                              ? "Processing..."
+                              : "Dismiss Report"}
+                          </button>
 
-                            <button
+                          <button
                             type="button"
-                            disabled={processing}
+                            disabled={
+                              processing
+                            }
                             onClick={() =>
-                                handleSuspend(report.id)
+                              handleSuspend(
+                                report.id
+                              )
                             }
                             className="min-w-44 flex-1 rounded-xl bg-red-600 px-5 py-3 font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
+                          >
                             {processing
-                                ? "Processing..."
-                                : "Suspend Listing"}
-                            </button>
+                              ? "Processing..."
+                              : "Suspend Listing"}
+                          </button>
                         </>
-                        )}
+                      )}
                     </div>
 
-                    {report.status !== "pending" &&
-                        report.reviewed_at && (
+                    {report.status !==
+                      "pending" &&
+                      report.reviewed_at && (
                         <p className="mt-4 text-sm text-gray-500">
-                            Reviewed{" "}
-                            {new Date(
+                          Reviewed{" "}
+                          {new Date(
                             report.reviewed_at
-                            ).toLocaleString()}
+                          ).toLocaleString()}
                         </p>
-                        )}
-                    </div>
+                      )}
+                  </div>
                 </article>
               );
             })}
@@ -462,7 +491,9 @@ function FilterButton({
   return (
     <button
       type="button"
-      onClick={() => onClick(value)}
+      onClick={() =>
+        onClick(value)
+      }
       className={`rounded-full px-4 py-2 text-sm font-medium transition ${
         isActive
           ? "bg-gray-950 text-white"
