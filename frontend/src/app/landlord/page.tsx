@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import LandlordListingCard from "@/components/LandlordListingCard";
 import EmptyState from "@/components/EmptyState";
+import ErrorState from "@/components/ErrorState";
 
 import { useAuth } from "@/context/AuthContext";
 
@@ -49,24 +50,27 @@ export default function LandlordPage() {
     setAvailabilityUpdatingId,
   ] = useState<number | null>(null);
 
-  useEffect(() => {
-    async function loadListings() {
-      try {
-        const data =
-          await getMyListings();
+  async function loadListings() {
+    try {
+      setLoading(true);
+      setError("");
 
-        setListings(data);
-      } catch (error) {
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Failed to load listings"
-        );
-      } finally {
-        setLoading(false);
-      }
+      const data =
+        await getMyListings();
+
+      setListings(data);
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to load listings"
+      );
+    } finally {
+      setLoading(false);
     }
+  }
 
+  useEffect(() => {
     loadListings();
   }, []);
 
@@ -284,9 +288,13 @@ export default function LandlordPage() {
               Loading your properties...
             </p>
           ) : error ? (
-            <p className="mt-8 text-red-600">
-              {error}
-            </p>
+            <div className="mt-10">
+              <ErrorState
+                title="Couldn't load your properties"
+                description="We had trouble loading your listings. Check your connection and try again."
+                onRetry={loadListings}
+              />
+            </div>
           ) : listings.length === 0 ? (
             <div className="mt-10">
               <EmptyState

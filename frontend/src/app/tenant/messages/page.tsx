@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -11,6 +13,7 @@ import Navbar from "@/components/Navbar";
 import ConversationCard from "@/components/ConversationCard";
 import ConversationCardSkeleton from "@/components/ConversationCardSkeleton";
 import EmptyState from "@/components/EmptyState";
+import ErrorState from "@/components/ErrorState";
 
 import {
   Conversation,
@@ -28,37 +31,73 @@ export default function TenantMessagesPage() {
   const [error, setError] =
     useState("");
 
-  useEffect(() => {
-    let isMounted = true;
+  const hasLoadedOnce = useRef(false);
 
-    async function loadConversations() {
+  const loadConversations = useCallback(
+    async (
+      showLoading = false
+    ) => {
       try {
+        if (showLoading) {
+          setLoading(true);
+        }
+
+        setError("");
+
         const data =
           await getConversations();
 
-        if (isMounted) {
-          setConversations(data);
-          setError("");
-        }
+        setConversations(data);
+        hasLoadedOnce.current = true;
       } catch (error) {
-        if (isMounted) {
+        /*
+         * Only show the full-page error if
+         * we have never successfully loaded
+         * conversations before.
+         *
+         * If background polling fails later,
+         * keep showing the existing inbox.
+         */
+        if (!hasLoadedOnce.current) {
           setError(
             error instanceof Error
               ? error.message
               : "Failed to load conversations"
           );
+        } else {
+          console.error(
+            "Failed to refresh conversations:",
+            error
+          );
         }
       } finally {
-        if (isMounted) {
+        if (showLoading) {
           setLoading(false);
         }
       }
+    },
+    []
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function initialLoad() {
+      if (!isMounted) {
+        return;
+      }
+
+      await loadConversations(true);
     }
 
-    loadConversations();
+    initialLoad();
 
     const interval = setInterval(
-      loadConversations,
+      () => {
+        if (isMounted) {
+          loadConversations(false);
+        }
+      },
       MESSAGE_POLL_INTERVAL
     );
 
@@ -66,7 +105,13 @@ export default function TenantMessagesPage() {
       isMounted = false;
       clearInterval(interval);
     };
-  }, []);
+  }, [loadConversations]);
+
+  async function handleRetry() {
+    hasLoadedOnce.current = false;
+
+    await loadConversations(true);
+  }
 
   return (
     <>
@@ -95,9 +140,13 @@ export default function TenantMessagesPage() {
             ))}
           </div>
         ) : error ? (
-          <p className="mt-8 text-red-600">
-            {error}
-          </p>
+          <div className="mt-10">
+            <ErrorState
+              title="Couldn't load conversations"
+              description="We had trouble loading your messages. Check your connection and try again."
+              onRetry={handleRetry}
+            />
+          </div>
         ) : conversations.length === 0 ? (
           <div className="mt-8">
             <EmptyState
@@ -114,7 +163,9 @@ export default function TenantMessagesPage() {
               (conversation) => (
                 <ConversationCard
                   key={conversation.id}
-                  conversation={conversation}
+                  conversation={
+                    conversation
+                  }
                   viewerRole="tenant"
                 />
               )

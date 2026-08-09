@@ -19,6 +19,7 @@ import { toast } from "sonner";
 
 import Navbar from "@/components/Navbar";
 import EmptyState from "@/components/EmptyState";
+import ErrorState from "@/components/ErrorState";
 
 import {
   AdminReport,
@@ -48,31 +49,31 @@ export default function AdminReportsPage() {
   const [error, setError] =
     useState("");
 
-  useEffect(() => {
-    async function loadReports() {
-      try {
-        setLoading(true);
-        setError("");
+  async function loadReports() {
+    try {
+      setLoading(true);
+      setError("");
 
-        const data =
-          await getAdminReports(
-            filter === "all"
-              ? undefined
-              : filter
-          );
-
-        setReports(data);
-      } catch (error) {
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Failed to load reports"
+      const data =
+        await getAdminReports(
+          filter === "all"
+            ? undefined
+            : filter
         );
-      } finally {
-        setLoading(false);
-      }
-    }
 
+      setReports(data);
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to load reports"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
     loadReports();
   }, [filter]);
 
@@ -89,7 +90,6 @@ export default function AdminReportsPage() {
 
     try {
       setProcessingId(reportId);
-      setError("");
 
       const updatedReport =
         await dismissReport(reportId);
@@ -125,7 +125,6 @@ export default function AdminReportsPage() {
 
     try {
       setProcessingId(reportId);
-      setError("");
 
       const updatedReport =
         await suspendReportedListing(
@@ -256,16 +255,18 @@ export default function AdminReportsPage() {
           />
         </div>
 
-        {error && (
-          <p className="mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </p>
-        )}
-
         {loading ? (
           <p className="mt-10 text-gray-500">
             Loading reports...
           </p>
+        ) : error ? (
+          <div className="mt-10">
+            <ErrorState
+              title="Couldn't load reports"
+              description="We had trouble loading listing reports. Check your connection and try again."
+              onRetry={loadReports}
+            />
+          </div>
         ) : reports.length === 0 ? (
           <div className="mt-10">
             <EmptyState
@@ -422,7 +423,7 @@ export default function AdminReportsPage() {
                                 report.id
                               )
                             }
-                            className="min-w-44 flex-1 rounded-xl border border-gray-300 px-5 py-3 font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="min-w-44 flex-1 rounded-xl border border-gray-300 px-5 py-3 font-medium text-gray-700 hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-50"
                           >
                             {processing
                               ? "Processing..."
@@ -439,7 +440,7 @@ export default function AdminReportsPage() {
                                 report.id
                               )
                             }
-                            className="min-w-44 flex-1 rounded-xl bg-red-600 px-5 py-3 font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="min-w-44 flex-1 rounded-xl bg-red-600 px-5 py-3 font-medium text-white hover:bg-red-700 disabled:pointer-events-none disabled:opacity-50"
                           >
                             {processing
                               ? "Processing..."
