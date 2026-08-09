@@ -17,40 +17,87 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   isAuthenticated: boolean;
-  login: (token: string, user: User) => void;
+  login: (
+    token: string,
+    user: User
+  ) => void;
   logout: () => void;
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(
-  undefined
-);
+const AuthContext =
+  createContext<AuthContextType | undefined>(
+    undefined
+  );
 
 export function AuthProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] =
+    useState<User | null>(null);
+
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
     async function loadUser() {
-      const token = localStorage.getItem("access_token");
+      const token =
+        localStorage.getItem(
+          "access_token"
+        );
 
       if (!token) {
         setLoading(false);
         return;
       }
 
+      const cachedUser =
+        localStorage.getItem("user");
+
+      if (cachedUser) {
+        try {
+          setUser(
+            JSON.parse(cachedUser)
+          );
+        } catch {
+          localStorage.removeItem(
+            "user"
+          );
+        }
+      }
+
       try {
-        const currentUser = await getCurrentUser(token);
+        const currentUser =
+          await getCurrentUser(token);
 
         setUser(currentUser);
-      } catch {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("user");
 
-        setUser(null);
+        localStorage.setItem(
+          "user",
+          JSON.stringify(currentUser)
+        );
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          error.message ===
+            "UNAUTHORIZED"
+        ) {
+          localStorage.removeItem(
+            "access_token"
+          );
+
+          localStorage.removeItem(
+            "user"
+          );
+
+          setUser(null);
+        } else {
+          console.error(
+            "Unable to verify session:",
+            error
+          );
+        }
       } finally {
         setLoading(false);
       }
@@ -59,15 +106,31 @@ export function AuthProvider({
     loadUser();
   }, []);
 
-  function login(token: string, user: User) {
-    localStorage.setItem("access_token", token);
+  function login(
+    token: string,
+    user: User
+  ) {
+    localStorage.setItem(
+      "access_token",
+      token
+    );
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(user)
+    );
 
     setUser(user);
   }
 
   function logout() {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("user");
+    localStorage.removeItem(
+      "access_token"
+    );
+
+    localStorage.removeItem(
+      "user"
+    );
 
     setUser(null);
   }
@@ -88,7 +151,8 @@ export function AuthProvider({
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context =
+    useContext(AuthContext);
 
   if (context === undefined) {
     throw new Error(

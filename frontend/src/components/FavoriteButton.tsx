@@ -91,7 +91,16 @@ export default function FavoriteButton({
       type="button"
       onClick={handleClick}
       disabled={loading}
-      className="rounded-full bg-white p-2 shadow disabled:cursor-not-allowed disabled:opacity-50"
+      className="
+      rounded-full
+      bg-white/90
+      p-2
+      shadow-md
+      backdrop-blur-sm
+      transition
+      hover:bg-white
+      disabled:pointer-events-none
+    "
       aria-label={
         isFavorited
           ? "Remove from favorites"

@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -11,6 +13,7 @@ import Navbar from "@/components/Navbar";
 import ConversationCard from "@/components/ConversationCard";
 import ConversationCardSkeleton from "@/components/ConversationCardSkeleton";
 import EmptyState from "@/components/EmptyState";
+import ErrorState from "@/components/ErrorState";
 
 import {
   Conversation,
@@ -28,45 +31,70 @@ export default function LandlordMessagesPage() {
   const [error, setError] =
     useState("");
 
-  useEffect(() => {
-    let isMounted = true;
+  const hasLoadedOnce =
+    useRef(false);
 
-    async function loadConversations() {
+  const loadConversations = useCallback(
+    async (
+      showLoading = false
+    ) => {
       try {
+        if (showLoading) {
+          setLoading(true);
+        }
+
+        setError("");
+
         const data =
           await getConversations();
 
-        if (isMounted) {
-          setConversations(data);
-          setError("");
-        }
+        setConversations(data);
+
+        hasLoadedOnce.current =
+          true;
       } catch (error) {
-        if (isMounted) {
+        if (!hasLoadedOnce.current) {
           setError(
             error instanceof Error
               ? error.message
               : "Failed to load conversations"
           );
+        } else {
+          console.error(
+            "Failed to refresh landlord conversations:",
+            error
+          );
         }
       } finally {
-        if (isMounted) {
+        if (showLoading) {
           setLoading(false);
         }
       }
-    }
+    },
+    []
+  );
 
-    loadConversations();
+  useEffect(() => {
+    loadConversations(true);
 
-    const interval = setInterval(
-      loadConversations,
-      MESSAGE_POLL_INTERVAL
-    );
+    const interval =
+      setInterval(
+        () => {
+          loadConversations(false);
+        },
+        MESSAGE_POLL_INTERVAL
+      );
 
     return () => {
-      isMounted = false;
       clearInterval(interval);
     };
-  }, []);
+  }, [loadConversations]);
+
+  async function handleRetry() {
+    hasLoadedOnce.current = false;
+
+    await loadConversations(true);
+  }
 
   return (
     <>
@@ -79,7 +107,8 @@ export default function LandlordMessagesPage() {
           </h1>
 
           <p className="mt-2 text-gray-600">
-            Tenant enquiries about your properties.
+            Tenant enquiries about your
+            properties.
           </p>
         </div>
 
@@ -87,20 +116,30 @@ export default function LandlordMessagesPage() {
           <div className="mt-8 space-y-4">
             {Array.from({
               length: 4,
-            }).map((_, index) => (
-              <ConversationCardSkeleton
-                key={index}
-              />
-            ))}
+            }).map(
+              (_, index) => (
+                <ConversationCardSkeleton
+                  key={index}
+                />
+              )
+            )}
           </div>
         ) : error ? (
-          <p className="mt-8 text-red-600">
-            {error}
-          </p>
+          <div className="mt-10">
+            <ErrorState
+              title="Couldn't load conversations"
+              description="We had trouble loading your tenant enquiries. Check your connection and try again."
+              onRetry={
+                handleRetry
+              }
+            />
+          </div>
         ) : conversations.length === 0 ? (
           <div className="mt-8">
             <EmptyState
-              icon={MessageSquare}
+              icon={
+                MessageSquare
+              }
               title="No tenant enquiries yet"
               description="Messages from tenants interested in your properties will appear here."
             />
@@ -108,10 +147,16 @@ export default function LandlordMessagesPage() {
         ) : (
           <div className="mt-8 space-y-4">
             {conversations.map(
-              (conversation) => (
+              (
+                conversation
+              ) => (
                 <ConversationCard
-                  key={conversation.id}
-                  conversation={conversation}
+                  key={
+                    conversation.id
+                  }
+                  conversation={
+                    conversation
+                  }
                   viewerRole="landlord"
                 />
               )
