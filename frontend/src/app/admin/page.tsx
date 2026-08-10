@@ -86,43 +86,55 @@ export default function AdminPage() {
     }
   }
 
-  async function handleReject(
-    listingId: number
-  ) {
-    const confirmed =
-      window.confirm(
-        "Reject this listing?"
-      );
+async function handleReject(
+  listingId: number
+) {
+  const reason = window.prompt(
+    "Why are you rejecting this listing?"
+  );
 
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      setProcessingId(listingId);
-
-      await rejectListing(listingId);
-
-      setListings((current) =>
-        current.filter(
-          (listing) =>
-            listing.id !== listingId
-        )
-      );
-
-      toast.success(
-        "Listing rejected"
-      );
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to reject listing"
-      );
-    } finally {
-      setProcessingId(null);
-    }
+  if (reason === null) {
+    return;
   }
+
+  const trimmedReason =
+    reason.trim();
+
+  if (trimmedReason.length < 5) {
+    toast.error(
+      "Please provide a rejection reason of at least 5 characters."
+    );
+    return;
+  }
+
+  try {
+    setProcessingId(listingId);
+
+    await rejectListing(
+      listingId,
+      trimmedReason
+    );
+
+    setListings((current) =>
+      current.filter(
+        (listing) =>
+          listing.id !== listingId
+      )
+    );
+
+    toast.success(
+      "Listing rejected"
+    );
+  } catch (error) {
+    toast.error(
+      error instanceof Error
+        ? error.message
+        : "Failed to reject listing"
+    );
+  } finally {
+    setProcessingId(null);
+  }
+}
 
   return (
     <>

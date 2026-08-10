@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -11,6 +13,7 @@ import Navbar from "@/components/Navbar";
 import ConversationCard from "@/components/ConversationCard";
 import ConversationCardSkeleton from "@/components/ConversationCardSkeleton";
 import EmptyState from "@/components/EmptyState";
+import ErrorState from "@/components/ErrorState";
 
 import {
   Conversation,
@@ -28,45 +31,128 @@ export default function LandlordMessagesPage() {
   const [error, setError] =
     useState("");
 
-  useEffect(() => {
-    let isMounted = true;
+  const hasLoadedOnce = useRef(false);
 
-    async function loadConversations() {
+  const intervalRef = useRef<
+    ReturnType<typeof setInterval> | null
+  >(null);
+
+  const stopPolling = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
+
+  const loadConversations = useCallback(
+    async (
+      showLoading = false
+    ): Promise<boolean> => {
       try {
+        if (showLoading) {
+          setLoading(true);
+        }
+
+        setError("");
+
         const data =
           await getConversations();
 
-        if (isMounted) {
-          setConversations(data);
-          setError("");
-        }
+        setConversations(data);
+
+        hasLoadedOnce.current = true;
+
+        return true;
       } catch (error) {
-        if (isMounted) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to load conversations";
+
+        if (message === "Unauthorized") {
+          stopPolling();
+
           setError(
-            error instanceof Error
-              ? error.message
-              : "Failed to load conversations"
+            "Your session has expired. Please log in again."
+          );
+
+          return false;
+        }
+
+        if (!hasLoadedOnce.current) {
+          setError(message);
+        } else {
+          console.error(
+            "Failed to refresh conversations:",
+            error
           );
         }
+
+        return false;
       } finally {
-        if (isMounted) {
+        if (showLoading) {
           setLoading(false);
         }
       }
-    }
+    },
+    [stopPolling]
+  );
 
-    loadConversations();
+  const startPolling = useCallback(() => {
+    stopPolling();
 
-    const interval = setInterval(
-      loadConversations,
+    intervalRef.current = setInterval(
+      () => {
+        loadConversations(false);
+      },
       MESSAGE_POLL_INTERVAL
     );
+  }, [
+    loadConversations,
+    stopPolling,
+  ]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function initialLoad() {
+      if (!isMounted) {
+        return;
+      }
+
+      const success =
+        await loadConversations(true);
+
+      if (
+        isMounted &&
+        success
+      ) {
+        startPolling();
+      }
+    }
+
+    initialLoad();
 
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      stopPolling();
     };
-  }, []);
+  }, [
+    loadConversations,
+    startPolling,
+    stopPolling,
+  ]);
+
+  async function handleRetry() {
+    hasLoadedOnce.current = false;
+
+    const success =
+      await loadConversations(true);
+
+    if (success) {
+      startPolling();
+    }
+  }
 
   return (
     <>
@@ -94,9 +180,25 @@ export default function LandlordMessagesPage() {
             ))}
           </div>
         ) : error ? (
-          <p className="mt-8 text-red-600">
-            {error}
-          </p>
+          <div className="mt-10">
+            <ErrorState
+              title={
+                error.includes(
+                  "session has expired"
+                )
+                  ? "Session expired"
+                  : "Couldn't load conversations"
+              }
+              description={
+                error.includes(
+                  "session has expired"
+                )
+                  ? "Please log in again to continue viewing tenant enquiries."
+                  : "We had trouble loading your messages. Check your connection and try again."
+              }
+              onRetry={handleRetry}
+            />
+          </div>
         ) : conversations.length === 0 ? (
           <div className="mt-8">
             <EmptyState
@@ -111,7 +213,9 @@ export default function LandlordMessagesPage() {
               (conversation) => (
                 <ConversationCard
                   key={conversation.id}
-                  conversation={conversation}
+                  conversation={
+                    conversation
+                  }
                   viewerRole="landlord"
                 />
               )

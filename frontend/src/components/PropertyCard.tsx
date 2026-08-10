@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Bath, Bed, Heart, MapPin } from "lucide-react";
+import { Bath, Bed, MapPin } from "lucide-react";
 
 import { Listing } from "@/types/listing";
 import FavoriteButton from "@/components/FavoriteButton";
+import { optimizeCloudinaryImage } from "@/lib/cloudinary";
 
 type PropertyCardProps = {
   property: Listing;
@@ -17,6 +18,15 @@ export default function PropertyCard({ property }: PropertyCardProps) {
     )?.image_url ??
     property.images?.[0]?.image_url ??
     property.image_url;
+
+  const optimizedCoverImage =
+    optimizeCloudinaryImage(
+      coverImage,
+      {
+        width: 900,
+        quality: "90",
+      }
+    );
   return (
     <Link
       href={`/listings/${property.id}`}
@@ -24,7 +34,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
     >
       <div className="relative">
         <img
-          src={coverImage ?? ""}
+          src={optimizedCoverImage}
           alt={property.title}
           className="aspect-[4/3] w-full bg-gray-100 object-cover object-center"
         />
