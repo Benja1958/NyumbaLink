@@ -9,9 +9,8 @@ import { Heart } from "lucide-react";
 
 import Navbar from "@/components/Navbar";
 import PropertyCard from "@/components/PropertyCard";
-import PropertyCardSkeleton from "@/components/PropertyCardSkeleton";
 import EmptyState from "@/components/EmptyState";
-import ErrorState from "@/components/ErrorState";
+import PropertyCardSkeleton from "@/components/PropertyCardSkeleton";
 
 import {
   FavoriteWithListing,
@@ -26,30 +25,20 @@ export default function FavoritesPage() {
   const [loading, setLoading] =
     useState(true);
 
-  const [error, setError] =
-    useState("");
-
-  async function loadFavorites() {
-    try {
-      setLoading(true);
-      setError("");
-
-      const data =
-        await getFavorites();
-
-      setFavorites(data);
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Failed to load saved properties"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
+    async function loadFavorites() {
+      try {
+        const data =
+          await getFavorites();
+
+        setFavorites(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     loadFavorites();
   }, []);
 
@@ -75,14 +64,6 @@ export default function FavoritesPage() {
                 key={index}
               />
             ))}
-          </div>
-        ) : error ? (
-          <div className="mt-10">
-            <ErrorState
-              title="Couldn't load saved properties"
-              description="We had trouble loading your favorites. Check your connection and try again."
-              onRetry={loadFavorites}
-            />
           </div>
         ) : favorites.length === 0 ? (
           <div className="mt-10">

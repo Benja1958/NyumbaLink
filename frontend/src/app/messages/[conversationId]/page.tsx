@@ -2,9 +2,7 @@
 
 import {
   FormEvent,
-  useCallback,
   useEffect,
-  useRef,
   useState,
 } from "react";
 
@@ -15,10 +13,8 @@ import {
 } from "next/navigation";
 
 import Navbar from "@/components/Navbar";
-import ErrorState from "@/components/ErrorState";
-import ConversationPageSkeleton from "@/components/ConversationPageSkeleton";
-
 import { useAuth } from "@/context/AuthContext";
+import ConversationPageSkeleton from "@/components/ConversationPageSkeleton";
 
 import {
   ConversationWithMessages,
@@ -49,85 +45,56 @@ export default function ConversationPage() {
   const [error, setError] =
     useState("");
 
-  const hasLoadedOnce =
-    useRef(false);
+  useEffect(() => {
+    let isMounted = true;
 
-  const loadConversation = useCallback(
-    async (
-      showLoading = false
-    ) => {
+    async function loadConversation() {
       try {
-        if (showLoading) {
-          setLoading(true);
-        }
-
-        setError("");
-
         const data =
           await getConversation(
             conversationId
           );
 
-        setConversation(data);
-
-        hasLoadedOnce.current =
-          true;
+        if (isMounted) {
+          setConversation(data);
+          setError("");
+        }
       } catch (error) {
-        if (!hasLoadedOnce.current) {
+        if (isMounted) {
           setError(
             error instanceof Error
               ? error.message
               : "Failed to load conversation"
           );
-        } else {
-          console.error(
-            "Failed to refresh conversation:",
-            error
-          );
         }
       } finally {
-        if (showLoading) {
+        if (isMounted) {
           setLoading(false);
         }
       }
-    },
-    [conversationId]
-  );
+    }
 
-  useEffect(() => {
-    loadConversation(true);
+    loadConversation();
 
-    const interval =
-      setInterval(
-        () => {
-          loadConversation(false);
-        },
-        MESSAGE_POLL_INTERVAL
-      );
+    const interval = setInterval(
+      loadConversation,
+      MESSAGE_POLL_INTERVAL
+    );
 
     return () => {
+      isMounted = false;
       clearInterval(interval);
     };
-  }, [
-    loadConversation,
-  ]);
-
-  async function handleRetry() {
-    hasLoadedOnce.current = false;
-
-    await loadConversation(true);
-  }
+  }, [conversationId]);
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
-    const form =
-      event.currentTarget;
+    const form = event.currentTarget;
 
-    const formData =
-      new FormData(form);
+    const formData = new FormData(form);
 
     const content =
       formData
@@ -141,6 +108,7 @@ export default function ConversationPage() {
 
     try {
       setSending(true);
+      setError("");
 
       const message =
         await sendMessage(
@@ -156,8 +124,7 @@ export default function ConversationPage() {
         const alreadyExists =
           current.messages.some(
             (existing) =>
-              existing.id ===
-              message.id
+              existing.id === message.id
           );
 
         if (alreadyExists) {
@@ -203,40 +170,16 @@ export default function ConversationPage() {
     );
   }
 
-  if (
-    error &&
-    !conversation
-  ) {
-    return (
-      <>
-        <Navbar />
-
-        <main className="mx-auto max-w-3xl px-6 py-20">
-          <ErrorState
-            title="Couldn't load conversation"
-            description="We had trouble loading this conversation. Check your connection and try again."
-            onRetry={
-              handleRetry
-            }
-          />
-        </main>
-      </>
-    );
-  }
-
   if (!conversation) {
     return (
       <>
         <Navbar />
 
-        <main className="mx-auto max-w-3xl px-6 py-20">
-          <ErrorState
-            title="Conversation unavailable"
-            description="This conversation could not be found or may no longer be available."
-            onRetry={
-              handleRetry
-            }
-          />
+        <main className="mx-auto max-w-3xl px-6 py-10">
+          <p className="text-red-600">
+            {error ||
+              "Conversation not found"}
+          </p>
         </main>
       </>
     );
@@ -249,8 +192,7 @@ export default function ConversationPage() {
 
   const coverImage =
     conversation.listing.images?.find(
-      (image) =>
-        image.is_cover
+      (image) => image.is_cover
     )?.image_url ??
     conversation.listing.images?.[0]
       ?.image_url ??
@@ -279,8 +221,7 @@ export default function ConversationPage() {
               <img
                 src={coverImage ?? ""}
                 alt={
-                  conversation.listing
-                    .title
+                  conversation.listing.title
                 }
                 className="h-16 w-20 rounded-xl object-cover"
               />
@@ -294,15 +235,11 @@ export default function ConversationPage() {
                 </h1>
 
                 <p className="mt-1 text-sm text-gray-600">
-                  {
-                    otherPerson.full_name
-                  }
+                  {otherPerson.full_name}
                 </p>
 
                 <p className="text-xs capitalize text-gray-400">
-                  {
-                    otherPerson.role
-                  }
+                  {otherPerson.role}
                 </p>
               </div>
 
@@ -332,77 +269,55 @@ export default function ConversationPage() {
 
           <div className="flex min-h-[520px] flex-col">
             <div className="flex-1 space-y-4 overflow-y-auto p-5">
-              {conversation.messages.length ===
-              0 ? (
-                <div className="flex min-h-[350px] items-center justify-center">
-                  <div className="text-center">
-                    <p className="font-medium text-gray-900">
-                      No messages yet
-                    </p>
+              {conversation.messages.map(
+                (message) => {
+                  const isMine =
+                    message.sender_id ===
+                    user?.id;
 
-                    <p className="mt-2 text-sm text-gray-500">
-                      Send the first message
-                      to start the
-                      conversation.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                conversation.messages.map(
-                  (message) => {
-                    const isMine =
-                      message.sender_id ===
-                      user?.id;
-
-                    return (
+                  return (
+                    <div
+                      key={message.id}
+                      className={`flex ${
+                        isMine
+                          ? "justify-end"
+                          : "justify-start"
+                      }`}
+                    >
                       <div
-                        key={
-                          message.id
-                        }
-                        className={`flex ${
+                        className={`max-w-[75%] rounded-2xl px-4 py-3 ${
                           isMine
-                            ? "justify-end"
-                            : "justify-start"
+                            ? "bg-green-800 text-white"
+                            : "bg-gray-100 text-gray-900"
                         }`}
                       >
-                        <div
-                          className={`max-w-[75%] rounded-2xl px-4 py-3 ${
+                        <p className="leading-6">
+                          {message.content}
+                        </p>
+
+                        <p
+                          className={`mt-1 text-xs ${
                             isMine
-                              ? "bg-green-800 text-white"
-                              : "bg-gray-100 text-gray-900"
+                              ? "text-white/70"
+                              : "text-gray-400"
                           }`}
                         >
-                          <p className="leading-6">
-                            {
-                              message.content
-                            }
-                          </p>
-
-                          <p
-                            className={`mt-1 text-xs ${
-                              isMine
-                                ? "text-white/70"
-                                : "text-gray-400"
-                            }`}
-                          >
-                            {formatMessageTime(
-                              message.created_at
-                            )}
-                          </p>
-                        </div>
+                          {formatMessageTime(
+                            message.created_at
+                          )}
+                        </p>
                       </div>
-                    );
-                  }
-                )
+                    </div>
+                  );
+                }
               )}
             </div>
 
-            {error &&
-              conversation && (
-                <p className="px-5 pb-2 text-sm text-red-600">
-                  {error}
-                </p>
-              )}
+            {error && (
+              <p className="px-5 pb-2 text-sm text-red-600">
+                {error}
+              </p>
+            )}
 
             <form
               onSubmit={handleSubmit}
@@ -419,7 +334,7 @@ export default function ConversationPage() {
               <button
                 type="submit"
                 disabled={sending}
-                className="rounded-xl bg-green-800 px-5 py-3 font-medium text-white hover:bg-green-900 disabled:pointer-events-none disabled:opacity-50"
+                className="rounded-xl bg-green-800 px-5 py-3 font-medium text-white hover:bg-green-900 disabled:opacity-50"
               >
                 {sending
                   ? "Sending..."
@@ -436,68 +351,45 @@ export default function ConversationPage() {
 function formatMessageTime(
   value: string
 ): string {
-  const date =
-    new Date(value);
+  const date = new Date(value);
+  const now = new Date();
 
-  const now =
-    new Date();
+  const today = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
 
-  const today =
-    new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate()
-    );
+  const messageDay = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  );
 
-  const messageDay =
-    new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate()
-    );
-
-  const differenceInDays =
-    Math.round(
-      (
-        today.getTime() -
-        messageDay.getTime()
-      ) /
-        (
-          1000 *
-          60 *
-          60 *
-          24
-        )
-    );
+  const differenceInDays = Math.round(
+    (today.getTime() -
+      messageDay.getTime()) /
+      (1000 * 60 * 60 * 24)
+  );
 
   const time =
-    date.toLocaleTimeString(
-      [],
-      {
-        hour: "numeric",
-        minute: "2-digit",
-      }
-    );
+    date.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+    });
 
-  if (
-    differenceInDays === 0
-  ) {
+  if (differenceInDays === 0) {
     return time;
   }
 
-  if (
-    differenceInDays === 1
-  ) {
+  if (differenceInDays === 1) {
     return `Yesterday, ${time}`;
   }
 
-  return date.toLocaleString(
-    [],
-    {
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    }
-  );
+  return date.toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
