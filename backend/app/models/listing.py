@@ -1,4 +1,16 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text, JSON, Boolean
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    JSON,
+    String,
+    Text,
+)
+
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from sqlalchemy import Text
@@ -7,6 +19,15 @@ from app.database import Base
 
 class Listing(Base):
     __tablename__ = "listings"
+
+    __table_args__ = (
+        Index(
+            "ix_listings_browse",
+            "approval_status",
+            "is_available",
+            "created_at",
+        ),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
 
