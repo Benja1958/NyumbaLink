@@ -69,7 +69,7 @@ export default function LandlordMessagesPage() {
             ? error.message
             : "Failed to load conversations";
 
-        if (message === "Unauthorized") {
+        if (message === "UNAUTHORIZED") {
           stopPolling();
 
           setError(

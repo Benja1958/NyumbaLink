@@ -1,5 +1,6 @@
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+  process.env.NEXT_PUBLIC_API_URL ??
+  "http://localhost:8000";
 
 export type UserRole =
   | "tenant"
@@ -52,7 +53,10 @@ async function getErrorMessage(
 
     if (Array.isArray(data.detail)) {
       return data.detail
-        .map((item: ValidationError) => item.msg)
+        .map(
+          (item: ValidationError) =>
+            item.msg
+        )
         .join(", ");
     }
 
@@ -65,22 +69,27 @@ async function getErrorMessage(
 export async function signupUser(
   payload: SignupPayload
 ): Promise<User> {
-  const response = await fetch(`${API_URL}/auth/signup`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-  const message = await getErrorMessage(
-    response,
-    "Failed to create account"
+  const response = await fetch(
+    `${API_URL}/auth/signup`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
   );
 
-  throw new Error(message);
-}
+  if (!response.ok) {
+    const message =
+      await getErrorMessage(
+        response,
+        "Failed to create account"
+      );
+
+    throw new Error(message);
+  }
 
   return response.json();
 }
@@ -88,36 +97,65 @@ export async function signupUser(
 export async function loginUser(
   payload: LoginPayload
 ): Promise<LoginResponse> {
-  const response = await fetch(`${API_URL}/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+  const response = await fetch(
+    `${API_URL}/auth/login`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
 
   if (!response.ok) {
-    const error = await response.json();
+    const message =
+      await getErrorMessage(
+        response,
+        "Failed to login"
+      );
+
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+export async function getCurrentUser(): Promise<User> {
+  const response = await fetch(
+    `${API_URL}/auth/me`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
+  );
+
+  if (response.status === 401) {
+    throw new Error("UNAUTHORIZED");
+  }
+
+  if (!response.ok) {
     throw new Error(
-      error.detail || "Failed to login"
+      "Failed to fetch current user"
     );
   }
 
   return response.json();
 }
 
-export async function getCurrentUser(
-  token: string
-): Promise<User> {
-  const response = await fetch(`${API_URL}/auth/me`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export async function logoutUser(): Promise<void> {
+  const response = await fetch(
+    `${API_URL}/auth/logout`,
+    {
+      method: "POST",
+      credentials: "include",
+    }
+  );
 
   if (!response.ok) {
-    throw new Error("Failed to fetch current user");
+    throw new Error(
+      "Failed to log out"
+    );
   }
-
-  return response.json();
 }

@@ -2,20 +2,7 @@ import { Listing } from "@/types/listing";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??
-  "http://127.0.0.1:8000";
-
-function getToken(): string {
-  const token =
-    localStorage.getItem("access_token");
-
-  if (!token) {
-    throw new Error(
-      "You must be logged in"
-    );
-  }
-
-  return token;
-}
+  "http://localhost:8000";
 
 async function getErrorMessage(
   response: Response,
@@ -34,19 +21,25 @@ async function getErrorMessage(
   }
 }
 
+function handleUnauthorized(
+  response: Response
+) {
+  if (response.status === 401) {
+    throw new Error("UNAUTHORIZED");
+  }
+}
+
 export async function getAllAdminListings(): Promise<
   Listing[]
 > {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/admin/listings`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -63,16 +56,14 @@ export async function getAllAdminListings(): Promise<
 export async function getPendingListings(): Promise<
   Listing[]
 > {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/admin/listings/pending`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -89,17 +80,15 @@ export async function getPendingListings(): Promise<
 export async function approveListing(
   listingId: number
 ): Promise<Listing> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/admin/listings/${listingId}/approve`,
     {
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -117,22 +106,21 @@ export async function rejectListing(
   listingId: number,
   reason: string
 ): Promise<Listing> {
-  const token =
-    localStorage.getItem("access_token");
-
   const response = await fetch(
     `${API_URL}/admin/listings/${listingId}/reject`,
     {
       method: "PATCH",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         reason,
       }),
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     let message =

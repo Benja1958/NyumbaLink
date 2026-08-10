@@ -10,6 +10,7 @@ import {
 
 import {
   getCurrentUser,
+  logoutUser,
   User,
 } from "@/lib/auth";
 
@@ -17,11 +18,8 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   isAuthenticated: boolean;
-  login: (
-    token: string,
-    user: User
-  ) => void;
-  logout: () => void;
+  login: (user: User) => void;
+  logout: () => Promise<void>;
 };
 
 const AuthContext =
@@ -42,16 +40,6 @@ export function AuthProvider({
 
   useEffect(() => {
     async function loadUser() {
-      const token =
-        localStorage.getItem(
-          "access_token"
-        );
-
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
       const cachedUser =
         localStorage.getItem("user");
 
@@ -69,7 +57,7 @@ export function AuthProvider({
 
       try {
         const currentUser =
-          await getCurrentUser(token);
+          await getCurrentUser();
 
         setUser(currentUser);
 
@@ -106,33 +94,33 @@ export function AuthProvider({
     loadUser();
   }, []);
 
-  function login(
-    token: string,
-    user: User
-  ) {
-    localStorage.setItem(
-      "access_token",
-      token
-    );
-
+  function login(user: User) {
     localStorage.setItem(
       "user",
       JSON.stringify(user)
     );
 
-    setUser(user);
-  }
-
-  function logout() {
     localStorage.removeItem(
       "access_token"
     );
 
-    localStorage.removeItem(
-      "user"
-    );
+    setUser(user);
+  }
 
-    setUser(null);
+  async function logout() {
+    try {
+      await logoutUser();
+    } finally {
+      localStorage.removeItem(
+        "access_token"
+      );
+
+      localStorage.removeItem(
+        "user"
+      );
+
+      setUser(null);
+    }
   }
 
   return (

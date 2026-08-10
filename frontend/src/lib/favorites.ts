@@ -1,7 +1,7 @@
 import { Listing } from "@/types/listing";
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export type Favorite = {
   id: number;
@@ -14,30 +14,26 @@ export type FavoriteWithListing = Favorite & {
   listing: Listing;
 };
 
-function getToken(): string {
-  const token = localStorage.getItem("access_token");
-
-  if (!token) {
-    throw new Error("You must be logged in");
+function handleUnauthorized(
+  response: Response
+) {
+  if (response.status === 401) {
+    throw new Error("UNAUTHORIZED");
   }
-
-  return token;
 }
 
 export async function addFavorite(
   listingId: number
 ): Promise<Favorite> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/favorites/${listingId}`,
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     const data = await response.json();
@@ -55,17 +51,15 @@ export async function addFavorite(
 export async function removeFavorite(
   listingId: number
 ): Promise<void> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/favorites/${listingId}`,
     {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     const data = await response.json();
@@ -81,16 +75,14 @@ export async function removeFavorite(
 export async function getFavorites(): Promise<
   FavoriteWithListing[]
 > {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/favorites/`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error("Failed to fetch favorites");
@@ -102,16 +94,14 @@ export async function getFavorites(): Promise<
 export async function getFavoriteStatus(
   listingId: number
 ): Promise<boolean> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/favorites/${listingId}/status`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error("Failed to check favorite status");

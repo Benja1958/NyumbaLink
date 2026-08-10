@@ -2,17 +2,7 @@ import { ListingImage } from "@/types/listing";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??
-  "http://127.0.0.1:8000";
-
-function getToken(): string {
-  const token = localStorage.getItem("access_token");
-
-  if (!token) {
-    throw new Error("You must be logged in");
-  }
-
-  return token;
-}
+  "http://localhost:8000";
 
 async function getErrorMessage(
   response: Response,
@@ -31,6 +21,14 @@ async function getErrorMessage(
   }
 }
 
+function handleUnauthorized(
+  response: Response
+) {
+  if (response.status === 401) {
+    throw new Error("UNAUTHORIZED");
+  }
+}
+
 export async function uploadListingImages(
   listingId: number,
   files: File[]
@@ -38,8 +36,6 @@ export async function uploadListingImages(
   if (files.length === 0) {
     throw new Error("Select at least one image");
   }
-
-  const token = getToken();
 
   const formData = new FormData();
 
@@ -51,12 +47,12 @@ export async function uploadListingImages(
     `${API_URL}/listings/${listingId}/images`,
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
       body: formData,
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -74,17 +70,15 @@ export async function deleteListingImage(
   listingId: number,
   imageId: number
 ): Promise<void> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/listings/${listingId}/images/${imageId}`,
     {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -100,17 +94,15 @@ export async function setListingCoverImage(
   listingId: number,
   imageId: number
 ): Promise<ListingImage> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/listings/${listingId}/images/${imageId}/cover`,
     {
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
