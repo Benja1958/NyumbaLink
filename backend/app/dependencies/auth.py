@@ -1,4 +1,9 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import (
+    Depends,
+    HTTPException,
+    Request,
+    status,
+)
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 from sqlalchemy.orm import Session
@@ -8,17 +13,39 @@ from app.models.user import User
 from app.utils.security import decode_access_token
 
 
-security = HTTPBearer()
+security = HTTPBearer(
+    auto_error=False
+)
 
 
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    request: Request,
+    credentials: HTTPAuthorizationCredentials | None = Depends(
+        security
+    ),
     db: Session = Depends(get_db),
 ):
-    token = credentials.credentials
+    token = request.cookies.get(
+        "access_token"
+    )
+
+    if (
+        not token
+        and credentials is not None
+    ):
+        token = credentials.credentials
+
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
 
     try:
-        payload = decode_access_token(token)
+        payload = decode_access_token(
+            token
+        )
+
         user_id = payload.get("sub")
 
         if user_id is None:
@@ -33,7 +60,13 @@ def get_current_user(
             detail="Invalid or expired token",
         )
 
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    user = (
+        db.query(User)
+        .filter(
+            User.id == int(user_id)
+        )
+        .first()
+    )
 
     if user is None:
         raise HTTPException(

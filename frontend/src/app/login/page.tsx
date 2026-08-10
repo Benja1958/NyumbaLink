@@ -33,7 +33,7 @@ export default function LoginPage() {
           formData.get("password")?.toString() ?? "",
       });
 
-        login(data.access_token, data.user);
+      login(data.user);
 
       if (data.user.role === "admin") {
         router.push("/admin");

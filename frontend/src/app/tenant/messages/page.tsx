@@ -74,7 +74,7 @@ export default function TenantMessagesPage() {
          * stop polling so we don't keep
          * sending repeated 401 requests.
          */
-        if (message === "Unauthorized") {
+        if (message === "UNAUTHORIZED") {
           stopPolling();
 
           setError(

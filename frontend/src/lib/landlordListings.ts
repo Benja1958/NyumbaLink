@@ -1,17 +1,7 @@
 import { Listing } from "@/types/listing";
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
-
-function getToken(): string {
-  const token = localStorage.getItem("access_token");
-
-  if (!token) {
-    throw new Error("You must be logged in");
-  }
-
-  return token;
-}
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 async function getErrorMessage(
   response: Response,
@@ -30,6 +20,14 @@ async function getErrorMessage(
   }
 }
 
+function handleUnauthorized(
+  response: Response
+) {
+  if (response.status === 401) {
+    throw new Error("UNAUTHORIZED");
+  }
+}
+
 export type ListingPayload = {
   title: string;
   description: string;
@@ -42,16 +40,14 @@ export type ListingPayload = {
 };
 
 export async function getMyListings(): Promise<Listing[]> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/listings/my-listings`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -68,18 +64,18 @@ export async function getMyListings(): Promise<Listing[]> {
 export async function createListing(
   payload: ListingPayload
 ): Promise<Listing> {
-  const token = getToken();
-
   const response = await fetch(`${API_URL}/listings/`, {
     method: "POST",
+    credentials: "include",
 
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
 
     body: JSON.stringify(payload),
   });
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -97,21 +93,21 @@ export async function updateListing(
   listingId: number,
   payload: ListingPayload
 ): Promise<Listing> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/listings/${listingId}`,
     {
       method: "PATCH",
+      credentials: "include",
 
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
 
       body: JSON.stringify(payload),
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -128,18 +124,15 @@ export async function updateListing(
 export async function deleteListing(
   listingId: number
 ): Promise<void> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/listings/${listingId}`,
     {
       method: "DELETE",
-
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -154,17 +147,15 @@ export async function deleteListing(
 export async function resubmitListing(
   listingId: number
 ): Promise<Listing> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/listings/${listingId}/resubmit`,
     {
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -181,17 +172,15 @@ export async function resubmitListing(
 export async function confirmListingAvailability(
   listingId: number
 ): Promise<Listing> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/listings/${listingId}/confirm-availability`,
     {
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -208,17 +197,15 @@ export async function confirmListingAvailability(
 export async function markListingAsRented(
   listingId: number
 ): Promise<Listing> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/listings/${listingId}/mark-rented`,
     {
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(

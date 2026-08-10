@@ -55,7 +55,7 @@ export const MESSAGE_POLL_INTERVAL = 7000;
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??
-  "http://127.0.0.1:8000";
+  "http://localhost:8000";
 
 function clearSessionAndRedirect() {
   localStorage.removeItem(
@@ -67,23 +67,6 @@ function clearSessionAndRedirect() {
   );
 
   window.location.href = "/login";
-}
-
-function getToken(): string {
-  const token =
-    localStorage.getItem(
-      "access_token"
-    );
-
-  if (!token) {
-    clearSessionAndRedirect();
-
-    throw new Error(
-      "UNAUTHORIZED"
-    );
-  }
-
-  return token;
 }
 
 async function handleUnauthorized(
@@ -122,17 +105,14 @@ async function getErrorMessage(
 export async function createConversation(
   listingId: number
 ): Promise<Conversation> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/messages/conversations`,
     {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type":
           "application/json",
-        Authorization:
-          `Bearer ${token}`,
       },
       body: JSON.stringify({
         listing_id: listingId,
@@ -159,15 +139,10 @@ export async function createConversation(
 export async function getConversations(): Promise<
   Conversation[]
 > {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/messages/conversations`,
     {
-      headers: {
-        Authorization:
-          `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
 
@@ -190,15 +165,10 @@ export async function getConversations(): Promise<
 export async function getConversation(
   conversationId: number
 ): Promise<ConversationWithMessages> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/messages/conversations/${conversationId}`,
     {
-      headers: {
-        Authorization:
-          `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
 
@@ -222,17 +192,14 @@ export async function sendMessage(
   conversationId: number,
   content: string
 ): Promise<Message> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/messages/conversations/${conversationId}/messages`,
     {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type":
           "application/json",
-        Authorization:
-          `Bearer ${token}`,
       },
       body: JSON.stringify({
         content,

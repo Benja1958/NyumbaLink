@@ -35,9 +35,12 @@ export default function Navbar() {
 
   const router = useRouter();
 
-  function handleLogout() {
-    logout();
-    router.push("/");
+  async function handleLogout() {
+    try {
+      await logout();
+    } finally {
+      router.push("/");
+    }
   }
 
   const homeHref =

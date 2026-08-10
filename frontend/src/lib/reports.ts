@@ -1,6 +1,6 @@
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??
-  "http://127.0.0.1:8000";
+  "http://localhost:8000";
 
 export const REPORT_REASONS = [
   "Property does not exist",
@@ -49,17 +49,6 @@ export type AdminReport = Report & {
   reporter: AdminReportUser;
 };
 
-function getToken(): string {
-  const token =
-    localStorage.getItem("access_token");
-
-  if (!token) {
-    throw new Error("You must be logged in");
-  }
-
-  return token;
-}
-
 async function getErrorMessage(
   response: Response,
   fallback: string
@@ -77,20 +66,26 @@ async function getErrorMessage(
   }
 }
 
+function handleUnauthorized(
+  response: Response
+) {
+  if (response.status === 401) {
+    throw new Error("UNAUTHORIZED");
+  }
+}
+
 export async function createReport(
   listingId: number,
   reason: ReportReason,
   details: string
 ): Promise<Report> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/reports/listings/${listingId}`,
     {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         reason,
@@ -98,6 +93,8 @@ export async function createReport(
       }),
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -114,16 +111,14 @@ export async function createReport(
 export async function getMyReports(): Promise<
   Report[]
 > {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/reports/my-reports`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -140,8 +135,6 @@ export async function getMyReports(): Promise<
 export async function getAdminReports(
   reportStatus?: ReportStatus
 ): Promise<AdminReport[]> {
-  const token = getToken();
-
   const query = reportStatus
     ? `?report_status=${reportStatus}`
     : "";
@@ -149,11 +142,11 @@ export async function getAdminReports(
   const response = await fetch(
     `${API_URL}/admin/reports${query}`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -170,17 +163,15 @@ export async function getAdminReports(
 export async function dismissReport(
   reportId: number
 ): Promise<AdminReport> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/admin/reports/${reportId}/dismiss`,
     {
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -197,17 +188,15 @@ export async function dismissReport(
 export async function suspendReportedListing(
   reportId: number
 ): Promise<AdminReport> {
-  const token = getToken();
-
   const response = await fetch(
     `${API_URL}/admin/reports/${reportId}/suspend-listing`,
     {
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     }
   );
+
+  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
