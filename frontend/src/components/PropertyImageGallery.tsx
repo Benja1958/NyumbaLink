@@ -292,15 +292,15 @@ export default function PropertyImageGallery({
                         : "border-transparent opacity-75 hover:opacity-100"
                     }`}
                   >
-                    <img
-                      src={
-                        optimizedThumbnail
-                      }
-                      alt={`${title}, thumbnail ${
-                        index + 1
-                      }`}
-                      className="h-20 w-28 object-cover object-center"
-                    />
+                  <img
+                    src={optimizedThumbnail}
+                    alt={`${title}, thumbnail ${
+                      index + 1
+                    }`}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-20 w-28 object-cover object-center"
+                  />
 
                     {index ===
                       0 && (
@@ -423,16 +423,15 @@ export default function PropertyImageGallery({
                           : "border-transparent opacity-50 hover:opacity-100"
                       }`}
                     >
-                      <img
-                        src={
-                          optimizedThumbnail
-                        }
-                        alt={`${title}, full-screen thumbnail ${
-                          index +
-                          1
-                        }`}
-                        className="h-14 w-20 object-cover"
-                      />
+                    <img
+                      src={optimizedThumbnail}
+                      alt={`${title}, full-screen thumbnail ${
+                        index + 1
+                      }`}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-14 w-20 object-cover"
+                    />
                     </button>
                   );
                 }

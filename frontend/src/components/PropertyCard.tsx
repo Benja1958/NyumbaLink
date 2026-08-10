@@ -36,6 +36,8 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         <img
           src={optimizedCoverImage}
           alt={property.title}
+          loading="lazy"
+          decoding="async"
           className="aspect-[4/3] w-full bg-gray-100 object-cover object-center"
         />
 
