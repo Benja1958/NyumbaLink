@@ -14,7 +14,6 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import AdminListingCard from "@/components/AdminListingCard";
 import EmptyState from "@/components/EmptyState";
-import ErrorState from "@/components/ErrorState";
 
 import {
   approveListing,
@@ -37,27 +36,24 @@ export default function AdminPage() {
   const [processingId, setProcessingId] =
     useState<number | null>(null);
 
-  async function loadPendingListings() {
-    try {
-      setLoading(true);
-      setError("");
-
-      const data =
-        await getPendingListings();
-
-      setListings(data);
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Failed to load listings"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
+    async function loadPendingListings() {
+      try {
+        const data =
+          await getPendingListings();
+
+        setListings(data);
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to load listings"
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
     loadPendingListings();
   }, []);
 
@@ -150,7 +146,7 @@ export default function AdminPage() {
               Pending Listings
             </h2>
 
-            {!loading && !error && (
+            {!loading && (
               <span className="rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-700">
                 {listings.length} pending
               </span>
@@ -162,13 +158,9 @@ export default function AdminPage() {
               Loading pending listings...
             </p>
           ) : error ? (
-            <div className="mt-10">
-              <ErrorState
-                title="Couldn't load pending listings"
-                description="We had trouble loading properties awaiting review. Check your connection and try again."
-                onRetry={loadPendingListings}
-              />
-            </div>
+            <p className="mt-8 text-red-600">
+              {error}
+            </p>
           ) : listings.length === 0 ? (
             <div className="mt-10">
               <EmptyState
