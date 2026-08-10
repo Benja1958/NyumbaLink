@@ -78,10 +78,12 @@ Focus on stability and production readiness.
 
 ## User Experience
 
-- [ ] Skeleton loading
-- [ ] Toast notifications
-- [ ] Empty states
-- [ ] Better error pages
+- [x] Skeleton loading
+- [x] Toast notifications
+- [x] Empty states
+- [x] Better error pages
+- [x] Preserve session when backend is temporarily unavailable
+- [x] Restore cached user after refresh
 
 ---
 

@@ -51,21 +51,51 @@ export type ConversationWithMessages =
     messages: Message[];
   };
 
-export const MESSAGE_POLL_INTERVAL = 5000;
+export const MESSAGE_POLL_INTERVAL = 7000;
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   "http://127.0.0.1:8000";
 
+function clearSessionAndRedirect() {
+  localStorage.removeItem(
+    "access_token"
+  );
+
+  localStorage.removeItem(
+    "user"
+  );
+
+  window.location.href = "/login";
+}
+
 function getToken(): string {
   const token =
-    localStorage.getItem("access_token");
+    localStorage.getItem(
+      "access_token"
+    );
 
   if (!token) {
-    throw new Error("You must be logged in");
+    clearSessionAndRedirect();
+
+    throw new Error(
+      "UNAUTHORIZED"
+    );
   }
 
   return token;
+}
+
+async function handleUnauthorized(
+  response: Response
+) {
+  if (response.status === 401) {
+    clearSessionAndRedirect();
+
+    throw new Error(
+      "UNAUTHORIZED"
+    );
+  }
 }
 
 async function getErrorMessage(
@@ -73,9 +103,13 @@ async function getErrorMessage(
   fallback: string
 ): Promise<string> {
   try {
-    const data = await response.json();
+    const data =
+      await response.json();
 
-    if (typeof data.detail === "string") {
+    if (
+      typeof data.detail ===
+      "string"
+    ) {
       return data.detail;
     }
 
@@ -95,13 +129,19 @@ export async function createConversation(
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        "Content-Type":
+          "application/json",
+        Authorization:
+          `Bearer ${token}`,
       },
       body: JSON.stringify({
         listing_id: listingId,
       }),
     }
+  );
+
+  await handleUnauthorized(
+    response
   );
 
   if (!response.ok) {
@@ -125,9 +165,14 @@ export async function getConversations(): Promise<
     `${API_URL}/messages/conversations`,
     {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization:
+          `Bearer ${token}`,
       },
     }
+  );
+
+  await handleUnauthorized(
+    response
   );
 
   if (!response.ok) {
@@ -151,9 +196,14 @@ export async function getConversation(
     `${API_URL}/messages/conversations/${conversationId}`,
     {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization:
+          `Bearer ${token}`,
       },
     }
+  );
+
+  await handleUnauthorized(
+    response
   );
 
   if (!response.ok) {
@@ -179,13 +229,19 @@ export async function sendMessage(
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        "Content-Type":
+          "application/json",
+        Authorization:
+          `Bearer ${token}`,
       },
       body: JSON.stringify({
         content,
       }),
     }
+  );
+
+  await handleUnauthorized(
+    response
   );
 
   if (!response.ok) {

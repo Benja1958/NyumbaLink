@@ -114,27 +114,44 @@ export async function approveListing(
 }
 
 export async function rejectListing(
-  listingId: number
+  listingId: number,
+  reason: string
 ): Promise<Listing> {
-  const token = getToken();
+  const token =
+    localStorage.getItem("access_token");
 
   const response = await fetch(
     `${API_URL}/admin/listings/${listingId}/reject`,
     {
       method: "PATCH",
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
+      body: JSON.stringify({
+        reason,
+      }),
     }
   );
 
   if (!response.ok) {
-    throw new Error(
-      await getErrorMessage(
-        response,
-        "Failed to reject listing"
-      )
-    );
+    let message =
+      "Failed to reject listing";
+
+    try {
+      const data =
+        await response.json();
+
+      if (
+        typeof data.detail === "string"
+      ) {
+        message = data.detail;
+      }
+    } catch {
+      // Keep fallback message.
+    }
+
+    throw new Error(message);
   }
 
   return response.json();

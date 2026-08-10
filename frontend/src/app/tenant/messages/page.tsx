@@ -33,10 +33,21 @@ export default function TenantMessagesPage() {
 
   const hasLoadedOnce = useRef(false);
 
+  const intervalRef = useRef<
+    ReturnType<typeof setInterval> | null
+  >(null);
+
+  const stopPolling = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
+
   const loadConversations = useCallback(
     async (
       showLoading = false
-    ) => {
+    ): Promise<boolean> => {
       try {
         if (showLoading) {
           setLoading(true);
@@ -48,36 +59,71 @@ export default function TenantMessagesPage() {
           await getConversations();
 
         setConversations(data);
+
         hasLoadedOnce.current = true;
+
+        return true;
       } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to load conversations";
+
+        /*
+         * If authentication has expired,
+         * stop polling so we don't keep
+         * sending repeated 401 requests.
+         */
+        if (message === "Unauthorized") {
+          stopPolling();
+
+          setError(
+            "Your session has expired. Please log in again."
+          );
+
+          return false;
+        }
+
         /*
          * Only show the full-page error if
-         * we have never successfully loaded
-         * conversations before.
+         * conversations have never loaded
+         * successfully before.
          *
          * If background polling fails later,
          * keep showing the existing inbox.
          */
         if (!hasLoadedOnce.current) {
-          setError(
-            error instanceof Error
-              ? error.message
-              : "Failed to load conversations"
-          );
+          setError(message);
         } else {
           console.error(
             "Failed to refresh conversations:",
             error
           );
         }
+
+        return false;
       } finally {
         if (showLoading) {
           setLoading(false);
         }
       }
     },
-    []
+    [stopPolling]
   );
+
+  const startPolling = useCallback(() => {
+    stopPolling();
+
+    intervalRef.current = setInterval(
+      () => {
+        loadConversations(false);
+      },
+      MESSAGE_POLL_INTERVAL
+    );
+  }, [
+    loadConversations,
+    stopPolling,
+  ]);
 
   useEffect(() => {
     let isMounted = true;
@@ -87,30 +133,38 @@ export default function TenantMessagesPage() {
         return;
       }
 
-      await loadConversations(true);
+      const success =
+        await loadConversations(true);
+
+      if (
+        isMounted &&
+        success
+      ) {
+        startPolling();
+      }
     }
 
     initialLoad();
 
-    const interval = setInterval(
-      () => {
-        if (isMounted) {
-          loadConversations(false);
-        }
-      },
-      MESSAGE_POLL_INTERVAL
-    );
-
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      stopPolling();
     };
-  }, [loadConversations]);
+  }, [
+    loadConversations,
+    startPolling,
+    stopPolling,
+  ]);
 
   async function handleRetry() {
     hasLoadedOnce.current = false;
 
-    await loadConversations(true);
+    const success =
+      await loadConversations(true);
+
+    if (success) {
+      startPolling();
+    }
   }
 
   return (
@@ -142,8 +196,20 @@ export default function TenantMessagesPage() {
         ) : error ? (
           <div className="mt-10">
             <ErrorState
-              title="Couldn't load conversations"
-              description="We had trouble loading your messages. Check your connection and try again."
+              title={
+                error.includes(
+                  "session has expired"
+                )
+                  ? "Session expired"
+                  : "Couldn't load conversations"
+              }
+              description={
+                error.includes(
+                  "session has expired"
+                )
+                  ? "Please log in again to continue viewing your messages."
+                  : "We had trouble loading your messages. Check your connection and try again."
+              }
               onRetry={handleRetry}
             />
           </div>

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { ListingImage } from "@/types/listing";
+import { optimizeCloudinaryImage } from "@/lib/cloudinary";
 
 type PropertyImageGalleryProps = {
   images: ListingImage[];
@@ -31,21 +32,31 @@ export default function PropertyImageGallery({
   const imageUrls = useMemo(() => {
     const sortedImages = [...images].sort(
       (first, second) => {
-        if (first.is_cover && !second.is_cover) {
+        if (
+          first.is_cover &&
+          !second.is_cover
+        ) {
           return -1;
         }
 
-        if (!first.is_cover && second.is_cover) {
+        if (
+          !first.is_cover &&
+          second.is_cover
+        ) {
           return 1;
         }
 
-        return first.position - second.position;
+        return (
+          first.position -
+          second.position
+        );
       }
     );
 
     if (sortedImages.length > 0) {
       return sortedImages.map(
-        (image) => image.image_url
+        (image) =>
+          image.image_url
       );
     }
 
@@ -57,30 +68,43 @@ export default function PropertyImageGallery({
   const [currentIndex, setCurrentIndex] =
     useState(0);
 
-  const [isFullscreen, setIsFullscreen] =
-    useState(false);
+  const [
+    isFullscreen,
+    setIsFullscreen,
+  ] = useState(false);
 
-  const showPrevious = useCallback(() => {
-    setCurrentIndex((current) =>
-      current === 0
-        ? imageUrls.length - 1
-        : current - 1
-    );
-  }, [imageUrls.length]);
+  const showPrevious =
+    useCallback(() => {
+      setCurrentIndex(
+        (current) =>
+          current === 0
+            ? imageUrls.length - 1
+            : current - 1
+      );
+    }, [imageUrls.length]);
 
-  const showNext = useCallback(() => {
-    setCurrentIndex((current) =>
-      current === imageUrls.length - 1
-        ? 0
-        : current + 1
-    );
-  }, [imageUrls.length]);
+  const showNext =
+    useCallback(() => {
+      setCurrentIndex(
+        (current) =>
+          current ===
+          imageUrls.length - 1
+            ? 0
+            : current + 1
+      );
+    }, [imageUrls.length]);
 
   useEffect(() => {
-    if (currentIndex >= imageUrls.length) {
+    if (
+      currentIndex >=
+      imageUrls.length
+    ) {
       setCurrentIndex(0);
     }
-  }, [currentIndex, imageUrls.length]);
+  }, [
+    currentIndex,
+    imageUrls.length,
+  ]);
 
   useEffect(() => {
     function handleKeyDown(
@@ -90,15 +114,23 @@ export default function PropertyImageGallery({
         return;
       }
 
-      if (event.key === "Escape") {
+      if (
+        event.key === "Escape"
+      ) {
         setIsFullscreen(false);
       }
 
-      if (event.key === "ArrowLeft") {
+      if (
+        event.key ===
+        "ArrowLeft"
+      ) {
         showPrevious();
       }
 
-      if (event.key === "ArrowRight") {
+      if (
+        event.key ===
+        "ArrowRight"
+      ) {
         showNext();
       }
     }
@@ -122,18 +154,21 @@ export default function PropertyImageGallery({
 
   useEffect(() => {
     document.body.style.overflow =
-      isFullscreen ? "hidden" : "";
+      isFullscreen
+        ? "hidden"
+        : "";
 
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow =
+        "";
     };
   }, [isFullscreen]);
 
   if (imageUrls.length === 0) {
     return (
-      <div className="flex aspect-[4/3] items-center justify-center rounded-2xl bg-gray-100">
-        <div className="text-center text-gray-500">
-          <Images className="mx-auto h-10 w-10 text-gray-300" />
+      <div className="flex aspect-[16/10] w-full items-center justify-center rounded-2xl bg-gray-100 text-gray-400">
+        <div className="text-center">
+          <Images className="mx-auto h-10 w-10" />
 
           <p className="mt-3 text-sm">
             No property photos available
@@ -145,6 +180,15 @@ export default function PropertyImageGallery({
 
   const currentImage =
     imageUrls[currentIndex];
+
+  const optimizedCurrentImage =
+    optimizeCloudinaryImage(
+      currentImage,
+      {
+        width: 1800,
+        quality: "90",
+      }
+    );
 
   return (
     <>
@@ -159,7 +203,9 @@ export default function PropertyImageGallery({
             aria-label="Open full-screen gallery"
           >
             <img
-              src={currentImage}
+              src={
+                optimizedCurrentImage
+              }
               alt={`${title}, photo ${
                 currentIndex + 1
               }`}
@@ -182,7 +228,9 @@ export default function PropertyImageGallery({
             <>
               <button
                 type="button"
-                onClick={showPrevious}
+                onClick={
+                  showPrevious
+                }
                 aria-label="Previous image"
                 className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/95 p-2 text-gray-900 opacity-0 shadow transition hover:bg-white group-hover:opacity-100"
               >
@@ -191,7 +239,9 @@ export default function PropertyImageGallery({
 
               <button
                 type="button"
-                onClick={showNext}
+                onClick={
+                  showNext
+                }
                 aria-label="Next image"
                 className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/95 p-2 text-gray-900 opacity-0 shadow transition hover:bg-white group-hover:opacity-100"
               >
@@ -209,37 +259,58 @@ export default function PropertyImageGallery({
         {imageUrls.length > 1 && (
           <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
             {imageUrls.map(
-              (imageUrl, index) => (
-                <button
-                  key={`${imageUrl}-${index}`}
-                  type="button"
-                  onClick={() =>
-                    setCurrentIndex(index)
-                  }
-                  aria-label={`View image ${
-                    index + 1
-                  }`}
-                  className={`relative shrink-0 overflow-hidden rounded-xl border-2 transition ${
-                    currentIndex === index
-                      ? "border-green-700"
-                      : "border-transparent opacity-75 hover:opacity-100"
-                  }`}
-                >
-                  <img
-                    src={imageUrl}
-                    alt={`${title}, thumbnail ${
+              (
+                imageUrl,
+                index
+              ) => {
+                const optimizedThumbnail =
+                  optimizeCloudinaryImage(
+                    imageUrl,
+                    {
+                      width: 300,
+                      quality:
+                        "90",
+                    }
+                  );
+
+                return (
+                  <button
+                    key={`${imageUrl}-${index}`}
+                    type="button"
+                    onClick={() =>
+                      setCurrentIndex(
+                        index
+                      )
+                    }
+                    aria-label={`View image ${
                       index + 1
                     }`}
-                    className="h-20 w-28 object-cover object-center"
-                  />
+                    className={`relative shrink-0 overflow-hidden rounded-xl border-2 transition ${
+                      currentIndex ===
+                      index
+                        ? "border-green-700"
+                        : "border-transparent opacity-75 hover:opacity-100"
+                    }`}
+                  >
+                    <img
+                      src={
+                        optimizedThumbnail
+                      }
+                      alt={`${title}, thumbnail ${
+                        index + 1
+                      }`}
+                      className="h-20 w-28 object-cover object-center"
+                    />
 
-                  {index === 0 && (
-                    <span className="absolute bottom-1 left-1 rounded bg-black/65 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                      Cover
-                    </span>
-                  )}
-                </button>
-              )
+                    {index ===
+                      0 && (
+                      <span className="absolute bottom-1 left-1 rounded bg-black/65 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                        Cover
+                      </span>
+                    )}
+                  </button>
+                );
+              }
             )}
           </div>
         )}
@@ -267,7 +338,9 @@ export default function PropertyImageGallery({
             <button
               type="button"
               onClick={() =>
-                setIsFullscreen(false)
+                setIsFullscreen(
+                  false
+                )
               }
               aria-label="Close gallery"
               className="rounded-full bg-white/10 p-2 transition hover:bg-white/20"
@@ -277,10 +350,13 @@ export default function PropertyImageGallery({
           </div>
 
           <div className="relative flex flex-1 items-center justify-center overflow-hidden px-16 pb-6">
-            {imageUrls.length > 1 && (
+            {imageUrls.length >
+              1 && (
               <button
                 type="button"
-                onClick={showPrevious}
+                onClick={
+                  showPrevious
+                }
                 aria-label="Previous image"
                 className="absolute left-6 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white transition hover:bg-white/20"
               >
@@ -289,17 +365,22 @@ export default function PropertyImageGallery({
             )}
 
             <img
-              src={currentImage}
+              src={
+                optimizedCurrentImage
+              }
               alt={`${title}, full-screen photo ${
                 currentIndex + 1
               }`}
               className="max-h-[78vh] max-w-full object-contain"
             />
 
-            {imageUrls.length > 1 && (
+            {imageUrls.length >
+              1 && (
               <button
                 type="button"
-                onClick={showNext}
+                onClick={
+                  showNext
+                }
                 aria-label="Next image"
                 className="absolute right-6 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white transition hover:bg-white/20"
               >
@@ -311,28 +392,50 @@ export default function PropertyImageGallery({
           {imageUrls.length > 1 && (
             <div className="flex justify-center gap-2 overflow-x-auto px-6 pb-5">
               {imageUrls.map(
-                (imageUrl, index) => (
-                  <button
-                    key={`fullscreen-${imageUrl}-${index}`}
-                    type="button"
-                    onClick={() =>
-                      setCurrentIndex(index)
-                    }
-                    className={`shrink-0 overflow-hidden rounded-lg border-2 transition ${
-                      currentIndex === index
-                        ? "border-white"
-                        : "border-transparent opacity-50 hover:opacity-100"
-                    }`}
-                  >
-                    <img
-                      src={imageUrl}
-                      alt={`${title}, full-screen thumbnail ${
-                        index + 1
+                (
+                  imageUrl,
+                  index
+                ) => {
+                  const optimizedThumbnail =
+                    optimizeCloudinaryImage(
+                      imageUrl,
+                      {
+                        width:
+                          300,
+                        quality:
+                          "90",
+                      }
+                    );
+
+                  return (
+                    <button
+                      key={`fullscreen-${imageUrl}-${index}`}
+                      type="button"
+                      onClick={() =>
+                        setCurrentIndex(
+                          index
+                        )
+                      }
+                      className={`shrink-0 overflow-hidden rounded-lg border-2 transition ${
+                        currentIndex ===
+                        index
+                          ? "border-white"
+                          : "border-transparent opacity-50 hover:opacity-100"
                       }`}
-                      className="h-14 w-20 object-cover"
-                    />
-                  </button>
-                )
+                    >
+                      <img
+                        src={
+                          optimizedThumbnail
+                        }
+                        alt={`${title}, full-screen thumbnail ${
+                          index +
+                          1
+                        }`}
+                        className="h-14 w-20 object-cover"
+                      />
+                    </button>
+                  );
+                }
               )}
             </div>
           )}
