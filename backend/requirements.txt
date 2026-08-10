@@ -10,3 +10,4 @@ email-validator
 python-jose[cryptography]
 cloudinary==1.45.0
 python-multipart==0.0.32
+alembic==1.19.1
