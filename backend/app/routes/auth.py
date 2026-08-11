@@ -21,6 +21,7 @@ from app.schemas.user import (
 )
 from app.utils.security import (
     create_access_token,
+    create_csrf_token,
     create_refresh_token,
     decode_refresh_token,
     hash_password,
@@ -137,6 +138,8 @@ def login(
         data=token_data
     )
 
+    csrf_token = create_csrf_token()
+
     response.set_cookie(
         key="access_token",
         value=access_token,
@@ -151,6 +154,16 @@ def login(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
+        secure=False,
+        samesite="lax",
+        max_age=7 * 24 * 60 * 60,
+        path="/",
+    )
+
+    response.set_cookie(
+        key="csrf_token",
+        value=csrf_token,
+        httponly=False,
         secure=False,
         samesite="lax",
         max_age=7 * 24 * 60 * 60,
@@ -264,6 +277,11 @@ def logout(
 
     response.delete_cookie(
         key="refresh_token",
+        path="/",
+    )
+
+    response.delete_cookie(
+        key="csrf_token",
         path="/",
     )
 

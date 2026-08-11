@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies.auth import require_landlord
+from app.dependencies.csrf import verify_csrf_token
 from app.models.listing import Listing
 from app.models.listing_image import ListingImage
 from app.models.user import User
@@ -48,6 +49,7 @@ def upload_listing_images(
     ],
     db: Session = Depends(get_db),
     current_user: User = Depends(require_landlord),
+    _: None = Depends(verify_csrf_token),
 ):
     listing = (
         db.query(Listing)
@@ -192,6 +194,7 @@ def set_cover_image(
     image_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_landlord),
+    _: None = Depends(verify_csrf_token),
 ):
     listing = (
         db.query(Listing)
@@ -256,6 +259,7 @@ def delete_listing_image(
     image_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_landlord),
+    _: None = Depends(verify_csrf_token),
 ):
     listing = (
         db.query(Listing)

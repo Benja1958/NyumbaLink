@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies.auth import get_current_user
+from app.dependencies.csrf import verify_csrf_token
 from app.models.conversation import Conversation
 from app.models.listing import Listing
 from app.models.message import Message
@@ -36,6 +37,7 @@ def create_conversation(
     payload: ConversationCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
+    _: None = Depends(verify_csrf_token),
 ):
     if current_user.role != "tenant":
         raise HTTPException(
@@ -317,6 +319,7 @@ def send_message(
     payload: MessageCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
+    _: None = Depends(verify_csrf_token),
 ):
     conversation = (
         db.query(Conversation)

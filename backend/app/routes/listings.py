@@ -8,6 +8,7 @@ from app.models.listing import Listing
 from app.models.user import User
 from app.schemas.listing import ListingCreate, ListingUpdate, ListingResponse
 from app.dependencies.auth import get_current_user, require_landlord
+from app.dependencies.csrf import verify_csrf_token
 
 
 router = APIRouter()
@@ -18,6 +19,7 @@ def create_listing(
     listing_data: ListingCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_landlord),
+    _: None = Depends(verify_csrf_token),
 ):
     new_listing = Listing(
         landlord_id=current_user.id,
@@ -96,6 +98,7 @@ def update_listing(
     listing_data: ListingUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_landlord),
+    _: None = Depends(verify_csrf_token),
 ):
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
 
@@ -130,6 +133,7 @@ def delete_listing(
     listing_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_landlord),
+    _: None = Depends(verify_csrf_token),
 ):
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
 
@@ -175,6 +179,7 @@ def resubmit_listing(
     listing_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_landlord),
+    _: None = Depends(verify_csrf_token),
 ):
     listing = (
         db.query(Listing)
@@ -220,6 +225,7 @@ def confirm_listing_availability(
     listing_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_landlord),
+    _: None = Depends(verify_csrf_token),
 ):
     listing = (
         db.query(Listing)
@@ -259,6 +265,7 @@ def mark_listing_as_rented(
     listing_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_landlord),
+    _: None = Depends(verify_csrf_token),
 ):
     listing = (
         db.query(Listing)

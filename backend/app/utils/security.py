@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 from jose import jwt
+import secrets
 from passlib.context import CryptContext
 from passlib.exc import UnknownHashError
 
@@ -15,6 +16,10 @@ pwd_context = CryptContext(
 
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
+
+
+def create_csrf_token() -> str:
+    return secrets.token_urlsafe(32)
 
 
 def verify_password(
