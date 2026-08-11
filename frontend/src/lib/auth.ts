@@ -1,3 +1,5 @@
+import { authFetch } from "@/lib/authFetch";
+
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   "http://localhost:8000";
@@ -47,11 +49,15 @@ async function getErrorMessage(
   try {
     const data = await response.json();
 
-    if (typeof data.detail === "string") {
+    if (
+      typeof data.detail === "string"
+    ) {
       return data.detail;
     }
 
-    if (Array.isArray(data.detail)) {
+    if (
+      Array.isArray(data.detail)
+    ) {
       return data.detail
         .map(
           (item: ValidationError) =>
@@ -75,7 +81,8 @@ export async function signupUser(
       method: "POST",
       credentials: "include",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type":
+          "application/json",
       },
       body: JSON.stringify(payload),
     }
@@ -103,7 +110,8 @@ export async function loginUser(
       method: "POST",
       credentials: "include",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type":
+          "application/json",
       },
       body: JSON.stringify(payload),
     }
@@ -123,17 +131,13 @@ export async function loginUser(
 }
 
 export async function getCurrentUser(): Promise<User> {
-  const response = await fetch(
-    `${API_URL}/auth/me`,
-    {
-      method: "GET",
-      credentials: "include",
-    }
-  );
-
-  if (response.status === 401) {
-    throw new Error("UNAUTHORIZED");
-  }
+  const response =
+    await authFetch(
+      `${API_URL}/auth/me`,
+      {
+        method: "GET",
+      }
+    );
 
   if (!response.ok) {
     throw new Error(

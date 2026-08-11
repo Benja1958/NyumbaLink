@@ -69,7 +69,7 @@ Focus on stability and production readiness.
 
 ## Authentication
 
-- [ ] HTTP-only cookies
+- [x] HTTP-only cookies
 - [ ] Refresh tokens
 - [ ] Session expiration
 - [ ] CSRF protection
@@ -89,10 +89,10 @@ Focus on stability and production readiness.
 
 ## Performance
 
-- [ ] Cloudinary image optimization
-- [ ] Lazy image loading
-- [ ] Pagination
-- [ ] Query optimization
+- [x] Cloudinary image optimization
+- [x] Lazy image loading
+- [x] Pagination
+- [x] Query optimization
 
 ---
 

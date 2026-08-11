@@ -1,3 +1,5 @@
+import { authFetch } from "@/lib/authFetch";
+
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   "http://localhost:8000";
@@ -66,24 +68,15 @@ async function getErrorMessage(
   }
 }
 
-function handleUnauthorized(
-  response: Response
-) {
-  if (response.status === 401) {
-    throw new Error("UNAUTHORIZED");
-  }
-}
-
 export async function createReport(
   listingId: number,
   reason: ReportReason,
   details: string
 ): Promise<Report> {
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/reports/listings/${listingId}`,
     {
       method: "POST",
-      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -93,8 +86,6 @@ export async function createReport(
       }),
     }
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -111,14 +102,9 @@ export async function createReport(
 export async function getMyReports(): Promise<
   Report[]
 > {
-  const response = await fetch(
-    `${API_URL}/reports/my-reports`,
-    {
-      credentials: "include",
-    }
+  const response = await authFetch(
+    `${API_URL}/reports/my-reports`
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -139,14 +125,9 @@ export async function getAdminReports(
     ? `?report_status=${reportStatus}`
     : "";
 
-  const response = await fetch(
-    `${API_URL}/admin/reports${query}`,
-    {
-      credentials: "include",
-    }
+  const response = await authFetch(
+    `${API_URL}/admin/reports${query}`
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -163,15 +144,12 @@ export async function getAdminReports(
 export async function dismissReport(
   reportId: number
 ): Promise<AdminReport> {
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/admin/reports/${reportId}/dismiss`,
     {
       method: "PATCH",
-      credentials: "include",
     }
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -188,15 +166,12 @@ export async function dismissReport(
 export async function suspendReportedListing(
   reportId: number
 ): Promise<AdminReport> {
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/admin/reports/${reportId}/suspend-listing`,
     {
       method: "PATCH",
-      credentials: "include",
     }
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(

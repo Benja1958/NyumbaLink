@@ -1,3 +1,4 @@
+import { authFetch } from "@/lib/authFetch";
 import { Listing } from "@/types/listing";
 
 const API_URL =
@@ -20,14 +21,6 @@ async function getErrorMessage(
   }
 }
 
-function handleUnauthorized(
-  response: Response
-) {
-  if (response.status === 401) {
-    throw new Error("UNAUTHORIZED");
-  }
-}
-
 export type ListingPayload = {
   title: string;
   description: string;
@@ -40,14 +33,9 @@ export type ListingPayload = {
 };
 
 export async function getMyListings(): Promise<Listing[]> {
-  const response = await fetch(
-    `${API_URL}/listings/my-listings`,
-    {
-      credentials: "include",
-    }
+  const response = await authFetch(
+    `${API_URL}/listings/my-listings`
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -64,9 +52,8 @@ export async function getMyListings(): Promise<Listing[]> {
 export async function createListing(
   payload: ListingPayload
 ): Promise<Listing> {
-  const response = await fetch(`${API_URL}/listings/`, {
+  const response = await authFetch(`${API_URL}/listings/`, {
     method: "POST",
-    credentials: "include",
 
     headers: {
       "Content-Type": "application/json",
@@ -74,8 +61,6 @@ export async function createListing(
 
     body: JSON.stringify(payload),
   });
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -93,11 +78,10 @@ export async function updateListing(
   listingId: number,
   payload: ListingPayload
 ): Promise<Listing> {
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/listings/${listingId}`,
     {
       method: "PATCH",
-      credentials: "include",
 
       headers: {
         "Content-Type": "application/json",
@@ -106,8 +90,6 @@ export async function updateListing(
       body: JSON.stringify(payload),
     }
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -124,15 +106,12 @@ export async function updateListing(
 export async function deleteListing(
   listingId: number
 ): Promise<void> {
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/listings/${listingId}`,
     {
       method: "DELETE",
-      credentials: "include",
     }
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -147,15 +126,12 @@ export async function deleteListing(
 export async function resubmitListing(
   listingId: number
 ): Promise<Listing> {
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/listings/${listingId}/resubmit`,
     {
       method: "PATCH",
-      credentials: "include",
     }
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -172,15 +148,12 @@ export async function resubmitListing(
 export async function confirmListingAvailability(
   listingId: number
 ): Promise<Listing> {
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/listings/${listingId}/confirm-availability`,
     {
       method: "PATCH",
-      credentials: "include",
     }
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -197,15 +170,12 @@ export async function confirmListingAvailability(
 export async function markListingAsRented(
   listingId: number
 ): Promise<Listing> {
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/listings/${listingId}/mark-rented`,
     {
       method: "PATCH",
-      credentials: "include",
     }
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
