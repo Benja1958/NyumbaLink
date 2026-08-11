@@ -35,15 +35,22 @@ async function refreshAccessToken(): Promise<boolean> {
 function handleExpiredSession(): never {
   localStorage.removeItem("user");
 
-  // Cleanup only in case an old token
-  // remains from the previous auth system.
   localStorage.removeItem(
     "access_token"
   );
 
-  window.location.href = "/login";
+  const isLoginPage =
+    window.location.pathname ===
+    "/login";
 
-  throw new Error("UNAUTHORIZED");
+  if (!isLoginPage) {
+    window.location.href =
+      "/login?reason=session-expired";
+  }
+
+  throw new Error(
+    "UNAUTHORIZED"
+  );
 }
 
 export async function authFetch(
