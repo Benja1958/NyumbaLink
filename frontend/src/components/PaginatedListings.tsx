@@ -1,7 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  Loader2,
+} from "lucide-react";
+
 import { toast } from "sonner";
 
 import PropertyCard from "@/components/PropertyCard";
@@ -37,6 +44,19 @@ export default function PaginatedListings({
       initialListings.length ===
         PAGE_SIZE
     );
+
+  useEffect(() => {
+    setListings(
+      initialListings
+    );
+
+    setHasMore(
+      initialListings.length ===
+        PAGE_SIZE
+    );
+
+    setLoadingMore(false);
+  }, [initialListings]);
 
   async function handleLoadMore() {
     if (
