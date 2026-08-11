@@ -2,6 +2,7 @@ from fastapi import (
     APIRouter,
     Depends,
     HTTPException,
+    Request,
     Response,
     status,
 )
@@ -10,18 +11,27 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.user import User
 from app.dependencies.auth import get_current_user
-from app.schemas.user import UserCreate, UserResponse, UserLogin, TokenResponse
-from app.utils.security import hash_password, verify_password, create_access_token
-
+from app.models.user import User
+from app.schemas.user import (
+    TokenResponse,
+    UserCreate,
+    UserLogin,
+    UserResponse,
+)
+from app.utils.security import (
+    create_access_token,
+    create_refresh_token,
+    decode_refresh_token,
+    hash_password,
+    verify_password,
+)
 
 router = APIRouter()
 
 
 @router.post(
     "/signup",
-    # response_model=...,
     status_code=status.HTTP_201_CREATED,
 )
 def signup(
@@ -30,7 +40,9 @@ def signup(
 ):
     existing_email = (
         db.query(User)
-        .filter(User.email == user_data.email)
+        .filter(
+            User.email == user_data.email
+        )
         .first()
     )
 
@@ -43,7 +55,8 @@ def signup(
     existing_phone = (
         db.query(User)
         .filter(
-            User.phone_number == user_data.phone_number
+            User.phone_number
+            == user_data.phone_number
         )
         .first()
     )
@@ -81,26 +94,47 @@ def signup(
     return user
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post(
+    "/login",
+    response_model=TokenResponse,
+)
 def login(
     login_data: UserLogin,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    user = db.query(User).filter(User.email == login_data.email).first()
+    user = (
+        db.query(User)
+        .filter(
+            User.email == login_data.email
+        )
+        .first()
+    )
 
-    if not user or not verify_password(login_data.password, user.password_hash):
+    if (
+        not user
+        or not verify_password(
+            login_data.password,
+            user.password_hash,
+        )
+    ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
 
+    token_data = {
+        "sub": str(user.id),
+        "email": user.email,
+        "role": user.role,
+    }
+
     access_token = create_access_token(
-        data={
-            "sub": str(user.id),
-            "email": user.email,
-            "role": user.role,
-        }
+        data=token_data
+    )
+
+    refresh_token = create_refresh_token(
+        data=token_data
     )
 
     response.set_cookie(
@@ -113,6 +147,16 @@ def login(
         path="/",
     )
 
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        max_age=7 * 24 * 60 * 60,
+        path="/",
+    )
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -120,21 +164,110 @@ def login(
     }
 
 
-@router.get("/me", response_model=UserResponse)
-def get_me(current_user: User = Depends(get_current_user)):
+@router.get(
+    "/me",
+    response_model=UserResponse,
+)
+def get_me(
+    current_user: User = Depends(
+        get_current_user
+    ),
+):
     return current_user
 
 
-@router.post("/logout")
-def logout(response: Response):
-    response.delete_cookie(
+@router.post("/refresh")
+def refresh_access_token(
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+):
+    refresh_token = (
+        request.cookies.get(
+            "refresh_token"
+        )
+    )
+
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token missing",
+        )
+
+    try:
+        payload = decode_refresh_token(
+            refresh_token
+        )
+
+        user_id = payload.get("sub")
+
+        if user_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
+            )
+
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token",
+        )
+
+    user = (
+        db.query(User)
+        .filter(
+            User.id == int(user_id)
+        )
+        .first()
+    )
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
+
+    new_access_token = (
+        create_access_token(
+            data={
+                "sub": str(user.id),
+                "email": user.email,
+                "role": user.role,
+            }
+        )
+    )
+
+    response.set_cookie(
         key="access_token",
-        path="/",
+        value=new_access_token,
         httponly=True,
         secure=False,
         samesite="lax",
+        max_age=60 * 60,
+        path="/",
     )
 
     return {
-        "message": "Logged out successfully"
+        "message":
+            "Access token refreshed"
+    }
+
+
+@router.post("/logout")
+def logout(
+    response: Response,
+):
+    response.delete_cookie(
+        key="access_token",
+        path="/",
+    )
+
+    response.delete_cookie(
+        key="refresh_token",
+        path="/",
+    )
+
+    return {
+        "message":
+            "Logged out successfully"
     }

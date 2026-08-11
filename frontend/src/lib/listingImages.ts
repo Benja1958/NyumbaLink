@@ -1,3 +1,4 @@
+import { authFetch } from "@/lib/authFetch";
 import { ListingImage } from "@/types/listing";
 
 const API_URL =
@@ -21,14 +22,6 @@ async function getErrorMessage(
   }
 }
 
-function handleUnauthorized(
-  response: Response
-) {
-  if (response.status === 401) {
-    throw new Error("UNAUTHORIZED");
-  }
-}
-
 export async function uploadListingImages(
   listingId: number,
   files: File[]
@@ -43,16 +36,13 @@ export async function uploadListingImages(
     formData.append("files", file);
   }
 
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/listings/${listingId}/images`,
     {
       method: "POST",
-      credentials: "include",
       body: formData,
     }
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -70,15 +60,12 @@ export async function deleteListingImage(
   listingId: number,
   imageId: number
 ): Promise<void> {
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/listings/${listingId}/images/${imageId}`,
     {
       method: "DELETE",
-      credentials: "include",
     }
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -94,15 +81,12 @@ export async function setListingCoverImage(
   listingId: number,
   imageId: number
 ): Promise<ListingImage> {
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/listings/${listingId}/images/${imageId}/cover`,
     {
       method: "PATCH",
-      credentials: "include",
     }
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(

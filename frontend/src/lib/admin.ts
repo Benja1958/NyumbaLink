@@ -1,3 +1,4 @@
+import { authFetch } from "@/lib/authFetch";
 import { Listing } from "@/types/listing";
 
 const API_URL =
@@ -21,25 +22,12 @@ async function getErrorMessage(
   }
 }
 
-function handleUnauthorized(
-  response: Response
-) {
-  if (response.status === 401) {
-    throw new Error("UNAUTHORIZED");
-  }
-}
-
 export async function getAllAdminListings(): Promise<
   Listing[]
 > {
-  const response = await fetch(
-    `${API_URL}/admin/listings`,
-    {
-      credentials: "include",
-    }
+  const response = await authFetch(
+    `${API_URL}/admin/listings`
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -56,14 +44,9 @@ export async function getAllAdminListings(): Promise<
 export async function getPendingListings(): Promise<
   Listing[]
 > {
-  const response = await fetch(
-    `${API_URL}/admin/listings/pending`,
-    {
-      credentials: "include",
-    }
+  const response = await authFetch(
+    `${API_URL}/admin/listings/pending`
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -80,15 +63,12 @@ export async function getPendingListings(): Promise<
 export async function approveListing(
   listingId: number
 ): Promise<Listing> {
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/admin/listings/${listingId}/approve`,
     {
       method: "PATCH",
-      credentials: "include",
     }
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error(
@@ -106,11 +86,10 @@ export async function rejectListing(
   listingId: number,
   reason: string
 ): Promise<Listing> {
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/admin/listings/${listingId}/reject`,
     {
       method: "PATCH",
-      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -119,8 +98,6 @@ export async function rejectListing(
       }),
     }
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     let message =

@@ -1,3 +1,4 @@
+import { authFetch } from "@/lib/authFetch";
 import { Listing } from "@/types/listing";
 
 const API_URL =
@@ -14,26 +15,15 @@ export type FavoriteWithListing = Favorite & {
   listing: Listing;
 };
 
-function handleUnauthorized(
-  response: Response
-) {
-  if (response.status === 401) {
-    throw new Error("UNAUTHORIZED");
-  }
-}
-
 export async function addFavorite(
   listingId: number
 ): Promise<Favorite> {
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/favorites/${listingId}`,
     {
       method: "POST",
-      credentials: "include",
     }
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     const data = await response.json();
@@ -51,15 +41,12 @@ export async function addFavorite(
 export async function removeFavorite(
   listingId: number
 ): Promise<void> {
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/favorites/${listingId}`,
     {
       method: "DELETE",
-      credentials: "include",
     }
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     const data = await response.json();
@@ -75,14 +62,9 @@ export async function removeFavorite(
 export async function getFavorites(): Promise<
   FavoriteWithListing[]
 > {
-  const response = await fetch(
-    `${API_URL}/favorites/`,
-    {
-      credentials: "include",
-    }
+  const response = await authFetch(
+    `${API_URL}/favorites/`
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error("Failed to fetch favorites");
@@ -94,14 +76,9 @@ export async function getFavorites(): Promise<
 export async function getFavoriteStatus(
   listingId: number
 ): Promise<boolean> {
-  const response = await fetch(
-    `${API_URL}/favorites/${listingId}/status`,
-    {
-      credentials: "include",
-    }
+  const response = await authFetch(
+    `${API_URL}/favorites/${listingId}/status`
   );
-
-  handleUnauthorized(response);
 
   if (!response.ok) {
     throw new Error("Failed to check favorite status");

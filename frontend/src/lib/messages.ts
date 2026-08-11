@@ -1,3 +1,4 @@
+import { authFetch } from "@/lib/authFetch";
 import { ListingImage } from "@/types/listing";
 
 export type Message = {
@@ -57,30 +58,6 @@ const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   "http://localhost:8000";
 
-function clearSessionAndRedirect() {
-  localStorage.removeItem(
-    "access_token"
-  );
-
-  localStorage.removeItem(
-    "user"
-  );
-
-  window.location.href = "/login";
-}
-
-async function handleUnauthorized(
-  response: Response
-) {
-  if (response.status === 401) {
-    clearSessionAndRedirect();
-
-    throw new Error(
-      "UNAUTHORIZED"
-    );
-  }
-}
-
 async function getErrorMessage(
   response: Response,
   fallback: string
@@ -105,11 +82,10 @@ async function getErrorMessage(
 export async function createConversation(
   listingId: number
 ): Promise<Conversation> {
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/messages/conversations`,
     {
       method: "POST",
-      credentials: "include",
       headers: {
         "Content-Type":
           "application/json",
@@ -118,10 +94,6 @@ export async function createConversation(
         listing_id: listingId,
       }),
     }
-  );
-
-  await handleUnauthorized(
-    response
   );
 
   if (!response.ok) {
@@ -139,15 +111,8 @@ export async function createConversation(
 export async function getConversations(): Promise<
   Conversation[]
 > {
-  const response = await fetch(
-    `${API_URL}/messages/conversations`,
-    {
-      credentials: "include",
-    }
-  );
-
-  await handleUnauthorized(
-    response
+  const response = await authFetch(
+    `${API_URL}/messages/conversations`
   );
 
   if (!response.ok) {
@@ -165,15 +130,8 @@ export async function getConversations(): Promise<
 export async function getConversation(
   conversationId: number
 ): Promise<ConversationWithMessages> {
-  const response = await fetch(
-    `${API_URL}/messages/conversations/${conversationId}`,
-    {
-      credentials: "include",
-    }
-  );
-
-  await handleUnauthorized(
-    response
+  const response = await authFetch(
+    `${API_URL}/messages/conversations/${conversationId}`
   );
 
   if (!response.ok) {
@@ -192,11 +150,10 @@ export async function sendMessage(
   conversationId: number,
   content: string
 ): Promise<Message> {
-  const response = await fetch(
+  const response = await authFetch(
     `${API_URL}/messages/conversations/${conversationId}/messages`,
     {
       method: "POST",
-      credentials: "include",
       headers: {
         "Content-Type":
           "application/json",
@@ -205,10 +162,6 @@ export async function sendMessage(
         content,
       }),
     }
-  );
-
-  await handleUnauthorized(
-    response
   );
 
   if (!response.ok) {
