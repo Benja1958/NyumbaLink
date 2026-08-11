@@ -5,6 +5,7 @@ from typing import List
 
 from app.database import get_db
 from app.dependencies.auth import require_admin
+from app.dependencies.csrf import verify_csrf_token
 
 from app.models.listing import Listing
 from app.models.user import User
@@ -45,6 +46,7 @@ def approve_listing(
     listing_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin),
+    _: None = Depends(verify_csrf_token),
 ):
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
 
@@ -75,6 +77,7 @@ def reject_listing(
     rejection_data: ListingRejectRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin),
+    _: None = Depends(verify_csrf_token),
 ):
     listing = (
         db.query(Listing)
@@ -147,6 +150,7 @@ def dismiss_report(
     report_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin),
+    _: None = Depends(verify_csrf_token),
 ):
     report = (
         db.query(Report)
@@ -186,6 +190,7 @@ def suspend_reported_listing(
     report_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin),
+    _: None = Depends(verify_csrf_token),
 ):
     report = (
         db.query(Report)

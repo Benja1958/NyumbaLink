@@ -5,6 +5,7 @@ from typing import List
 
 from app.database import get_db
 from app.dependencies.auth import require_tenant
+from app.dependencies.csrf import verify_csrf_token
 from app.models.favorite import Favorite
 from app.models.listing import Listing
 from app.models.user import User
@@ -19,6 +20,7 @@ def add_favorite(
     listing_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_tenant),
+    _: None = Depends(verify_csrf_token),
 ):
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
 
@@ -74,6 +76,7 @@ def remove_favorite(
     listing_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_tenant),
+    _: None = Depends(verify_csrf_token),
 ):
     favorite = (
         db.query(Favorite)

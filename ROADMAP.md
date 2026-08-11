@@ -70,8 +70,8 @@ Focus on stability and production readiness.
 ## Authentication
 
 - [x] HTTP-only cookies
-- [ ] Refresh tokens
-- [ ] Session expiration
+- [x] Refresh tokens
+- [x] Session expiration
 - [ ] CSRF protection
 
 ---

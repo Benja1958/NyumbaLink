@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies.auth import require_tenant
+from app.dependencies.csrf import verify_csrf_token
 from app.models.listing import Listing
 from app.models.report import Report
 from app.models.user import User
@@ -34,6 +35,7 @@ def create_report(
     report_data: ReportCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_tenant),
+    _: None = Depends(verify_csrf_token),
 ):
     listing = (
         db.query(Listing)

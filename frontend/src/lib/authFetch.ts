@@ -5,6 +5,83 @@ const API_URL =
 let refreshPromise:
   Promise<boolean> | null = null;
 
+function getCsrfToken():
+  string | null {
+  if (
+    typeof document ===
+    "undefined"
+  ) {
+    return null;
+  }
+
+  const cookies =
+    document.cookie.split("; ");
+
+  const csrfCookie =
+    cookies.find((cookie) =>
+      cookie.startsWith(
+        "csrf_token="
+      )
+    );
+
+  if (!csrfCookie) {
+    return null;
+  }
+
+  return decodeURIComponent(
+    csrfCookie.split("=")[1]
+  );
+}
+
+function isStateChangingMethod(
+  method?: string
+): boolean {
+  const normalizedMethod =
+    (
+      method ?? "GET"
+    ).toUpperCase();
+
+  return [
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+  ].includes(
+    normalizedMethod
+  );
+}
+
+function buildAuthInit(
+  init: RequestInit
+): RequestInit {
+  const headers =
+    new Headers(
+      init.headers ?? {}
+    );
+
+  if (
+    isStateChangingMethod(
+      init.method
+    )
+  ) {
+    const csrfToken =
+      getCsrfToken();
+
+    if (csrfToken) {
+      headers.set(
+        "X-CSRF-Token",
+        csrfToken
+      );
+    }
+  }
+
+  return {
+    ...init,
+    credentials: "include",
+    headers,
+  };
+}
+
 async function performRefresh(): Promise<boolean> {
   try {
     const response = await fetch(
@@ -24,16 +101,20 @@ async function performRefresh(): Promise<boolean> {
 async function refreshAccessToken(): Promise<boolean> {
   if (!refreshPromise) {
     refreshPromise =
-      performRefresh().finally(() => {
-        refreshPromise = null;
-      });
+      performRefresh().finally(
+        () => {
+          refreshPromise = null;
+        }
+      );
   }
 
   return refreshPromise;
 }
 
 function handleExpiredSession(): never {
-  localStorage.removeItem("user");
+  localStorage.removeItem(
+    "user"
+  );
 
   localStorage.removeItem(
     "access_token"
@@ -57,22 +138,20 @@ export async function authFetch(
   input: RequestInfo | URL,
   init: RequestInit = {}
 ): Promise<Response> {
+  const requestInit =
+    buildAuthInit(init);
+
   const response = await fetch(
     input,
-    {
-      ...init,
-      credentials: "include",
-    }
+    requestInit
   );
 
-  // Normal successful request, or an error
-  // unrelated to authentication.
-  if (response.status !== 401) {
+  if (
+    response.status !== 401
+  ) {
     return response;
   }
 
-  // Access token may have expired.
-  // Try refreshing it once.
   const refreshed =
     await refreshAccessToken();
 
@@ -80,21 +159,15 @@ export async function authFetch(
     handleExpiredSession();
   }
 
-  // Retry the original request now that
-  // the browser has a new access_token cookie.
   const retryResponse =
     await fetch(
       input,
-      {
-        ...init,
-        credentials: "include",
-      }
+      buildAuthInit(init)
     );
 
-  // If it still fails with 401, the session
-  // cannot be recovered.
   if (
-    retryResponse.status === 401
+    retryResponse.status ===
+    401
   ) {
     handleExpiredSession();
   }
