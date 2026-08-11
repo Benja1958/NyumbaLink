@@ -1,50 +1,120 @@
 "use client";
 
+import {
+  FormEvent,
+  useEffect,
+  useState,
+} from "react";
+
 import { Search } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent } from "react";
+
+import {
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 
 export default function SearchFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  const [location, setLocation] =
+    useState("");
+
+  const [minRent, setMinRent] =
+    useState("");
+
+  const [maxRent, setMaxRent] =
+    useState("");
+
+  const [bedrooms, setBedrooms] =
+    useState("");
+
+  const [bathrooms, setBathrooms] =
+    useState("");
+
+  useEffect(() => {
+    setLocation(
+      searchParams.get("location") ?? ""
+    );
+
+    setMinRent(
+      searchParams.get("min_rent") ?? ""
+    );
+
+    setMaxRent(
+      searchParams.get("max_rent") ?? ""
+    );
+
+    setBedrooms(
+      searchParams.get("bedrooms") ?? ""
+    );
+
+    setBathrooms(
+      searchParams.get("bathrooms") ?? ""
+    );
+  }, [searchParams]);
+
+  function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
 
-    const formData = new FormData(event.currentTarget);
-    const params = new URLSearchParams();
+    const params =
+      new URLSearchParams();
 
-    const location = formData.get("location")?.toString().trim();
-    const minRent = formData.get("min_rent")?.toString();
-    const maxRent = formData.get("max_rent")?.toString();
-    const bedrooms = formData.get("bedrooms")?.toString();
-    const bathrooms = formData.get("bathrooms")?.toString();
-
-    if (location) {
-      params.set("location", location);
+    if (location.trim()) {
+      params.set(
+        "location",
+        location.trim()
+      );
     }
 
     if (minRent) {
-      params.set("min_rent", minRent);
+      params.set(
+        "min_rent",
+        minRent
+      );
     }
 
     if (maxRent) {
-      params.set("max_rent", maxRent);
+      params.set(
+        "max_rent",
+        maxRent
+      );
     }
 
     if (bedrooms) {
-      params.set("bedrooms", bedrooms);
+      params.set(
+        "bedrooms",
+        bedrooms
+      );
     }
 
     if (bathrooms) {
-      params.set("bathrooms", bathrooms);
+      params.set(
+        "bathrooms",
+        bathrooms
+      );
     }
 
-    router.push(`/tenant?${params.toString()}`);
+    const query =
+      params.toString();
+
+    router.push(
+      query
+        ? `/tenant?${query}`
+        : "/tenant"
+    );
   }
 
   function clearFilters() {
-    router.push("/tenant");
+    setLocation("");
+    setMinRent("");
+    setMaxRent("");
+    setBedrooms("");
+    setBathrooms("");
+
+    router.replace("/tenant");
   }
 
   return (
@@ -65,7 +135,12 @@ export default function SearchFilters() {
               name="location"
               type="text"
               placeholder="Westlands..."
-              defaultValue={searchParams.get("location") ?? ""}
+              value={location}
+              onChange={(event) =>
+                setLocation(
+                  event.target.value
+                )
+              }
               className="w-full rounded-lg border border-gray-300 py-3 pl-9 pr-3"
             />
           </div>
@@ -81,7 +156,12 @@ export default function SearchFilters() {
             type="number"
             min="0"
             placeholder="10000"
-            defaultValue={searchParams.get("min_rent") ?? ""}
+            value={minRent}
+            onChange={(event) =>
+              setMinRent(
+                event.target.value
+              )
+            }
             className="w-full rounded-lg border border-gray-300 px-3 py-3"
           />
         </div>
@@ -96,7 +176,12 @@ export default function SearchFilters() {
             type="number"
             min="0"
             placeholder="50000"
-            defaultValue={searchParams.get("max_rent") ?? ""}
+            value={maxRent}
+            onChange={(event) =>
+              setMaxRent(
+                event.target.value
+              )
+            }
             className="w-full rounded-lg border border-gray-300 px-3 py-3"
           />
         </div>
@@ -108,14 +193,29 @@ export default function SearchFilters() {
 
           <select
             name="bedrooms"
-            defaultValue={searchParams.get("bedrooms") ?? ""}
+            value={bedrooms}
+            onChange={(event) =>
+              setBedrooms(
+                event.target.value
+              )
+            }
             className="w-full rounded-lg border border-gray-300 px-3 py-3"
           >
-            <option value="">Any</option>
-            <option value="1">1+</option>
-            <option value="2">2+</option>
-            <option value="3">3+</option>
-            <option value="4">4+</option>
+            <option value="">
+              Any
+            </option>
+            <option value="1">
+              1+
+            </option>
+            <option value="2">
+              2+
+            </option>
+            <option value="3">
+              3+
+            </option>
+            <option value="4">
+              4+
+            </option>
           </select>
         </div>
 
@@ -126,13 +226,26 @@ export default function SearchFilters() {
 
           <select
             name="bathrooms"
-            defaultValue={searchParams.get("bathrooms") ?? ""}
+            value={bathrooms}
+            onChange={(event) =>
+              setBathrooms(
+                event.target.value
+              )
+            }
             className="w-full rounded-lg border border-gray-300 px-3 py-3"
           >
-            <option value="">Any</option>
-            <option value="1">1+</option>
-            <option value="2">2+</option>
-            <option value="3">3+</option>
+            <option value="">
+              Any
+            </option>
+            <option value="1">
+              1+
+            </option>
+            <option value="2">
+              2+
+            </option>
+            <option value="3">
+              3+
+            </option>
           </select>
         </div>
       </div>
