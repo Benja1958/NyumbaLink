@@ -2,6 +2,7 @@
 
 import {
   FormEvent,
+  Suspense,
   useState,
 } from "react";
 
@@ -17,10 +18,9 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
-
 import { loginUser } from "@/lib/auth";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams =
     useSearchParams();
@@ -93,8 +93,8 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-6 py-12">
-      <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+    <main className="min-h-screen bg-gray-50 px-6 py-12">
+      <div className="mx-auto max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
         <Link
           href="/"
           className="text-sm font-medium text-gray-600 hover:text-gray-900"
@@ -171,5 +171,29 @@ export default function LoginPage() {
         </form>
       </div>
     </main>
+  );
+}
+
+function LoginFallback() {
+  return (
+    <main className="min-h-screen bg-gray-50 px-6 py-12">
+      <div className="mx-auto max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+        <p className="text-sm text-gray-600">
+          Loading...
+        </p>
+      </div>
+    </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <LoginFallback />
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }
