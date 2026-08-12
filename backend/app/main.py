@@ -3,8 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.models.listing_image import ListingImage
 
 from app.database import (
-    Base,
-    engine,
     ensure_listing_approval_status_column,
     ensure_listing_rejection_columns,
     ensure_message_read_at_column,
@@ -30,9 +28,6 @@ from app.routes import (
     images,
     reports,
 )
-
-
-Base.metadata.create_all(bind=engine)
 
 ensure_listing_rejection_columns()
 ensure_listing_availability_confirmation_column()
