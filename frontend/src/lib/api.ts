@@ -1,7 +1,11 @@
 import { Listing } from "@/types/listing";
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+  typeof window === "undefined"
+    ? process.env.API_SERVER_URL ??
+      "http://localhost:8000"
+    : process.env.NEXT_PUBLIC_API_URL ??
+      "http://localhost:8000";
 
 export type ListingFilters = {
   location?: string;
