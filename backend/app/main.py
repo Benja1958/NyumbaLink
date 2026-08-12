@@ -2,13 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.models.listing_image import ListingImage
 
-from app.database import (
-    ensure_listing_approval_status_column,
-    ensure_listing_rejection_columns,
-    ensure_message_read_at_column,
-    ensure_listing_availability_confirmation_column,
-)
-
 # Import models so SQLAlchemy registers all tables before create_all()
 from app.models import (
     User,
@@ -28,11 +21,6 @@ from app.routes import (
     images,
     reports,
 )
-
-ensure_listing_rejection_columns()
-ensure_listing_availability_confirmation_column()
-ensure_listing_approval_status_column()
-ensure_message_read_at_column()
 
 
 app = FastAPI(
