@@ -15,6 +15,7 @@ venv/
 env/
 .venv/
 ENV/
+.env.docker
 
 # FastAPI / Python tooling
 .pytest_cache/
