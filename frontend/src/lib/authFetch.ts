@@ -82,15 +82,17 @@ function buildAuthInit(
   };
 }
 
-async function performRefresh(): Promise<boolean> {
+async function performRefresh():
+  Promise<boolean> {
   try {
-    const response = await fetch(
-      `${API_URL}/auth/refresh`,
-      {
-        method: "POST",
-        credentials: "include",
-      }
-    );
+    const response =
+      await fetch(
+        `${API_URL}/auth/refresh`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
 
     return response.ok;
   } catch {
@@ -98,7 +100,8 @@ async function performRefresh(): Promise<boolean> {
   }
 }
 
-async function refreshAccessToken(): Promise<boolean> {
+async function refreshAccessToken():
+  Promise<boolean> {
   if (!refreshPromise) {
     refreshPromise =
       performRefresh().finally(
@@ -111,7 +114,13 @@ async function refreshAccessToken(): Promise<boolean> {
   return refreshPromise;
 }
 
-function handleExpiredSession(): never {
+function handleExpiredSession():
+  never {
+  const hadSession =
+    localStorage.getItem(
+      "user"
+    ) !== null;
+
   localStorage.removeItem(
     "user"
   );
@@ -124,7 +133,10 @@ function handleExpiredSession(): never {
     window.location.pathname ===
     "/login";
 
-  if (!isLoginPage) {
+  if (
+    hadSession &&
+    !isLoginPage
+  ) {
     window.location.href =
       "/login?reason=session-expired";
   }
@@ -141,10 +153,11 @@ export async function authFetch(
   const requestInit =
     buildAuthInit(init);
 
-  const response = await fetch(
-    input,
-    requestInit
-  );
+  const response =
+    await fetch(
+      input,
+      requestInit
+    );
 
   if (
     response.status !== 401
@@ -166,8 +179,7 @@ export async function authFetch(
     );
 
   if (
-    retryResponse.status ===
-    401
+    retryResponse.status === 401
   ) {
     handleExpiredSession();
   }
