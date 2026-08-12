@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  async rewrites() {
+    return [
+      {
+        source: "/backend-api/:path*",
+        destination:
+          "https://nyumbalink-api.onrender.com/:path*",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
