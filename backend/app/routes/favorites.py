@@ -56,7 +56,7 @@ def add_favorite(
     return favorite
 
 
-@router.get("/", response_model=List[FavoriteWithListingResponse])
+@router.get("", response_model=List[FavoriteWithListingResponse])
 def get_favorites(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_tenant),
