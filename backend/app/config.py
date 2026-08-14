@@ -15,9 +15,14 @@ class Settings(BaseSettings):
     ADMIN_PHONE_NUMBER: str | None = None
     ADMIN_FULL_NAME: str = "NyumbaLink Admin"
 
+    # Cloudinary
     CLOUDINARY_CLOUD_NAME: str
     CLOUDINARY_API_KEY: str
     CLOUDINARY_API_SECRET: str
+
+    # Sentry
+    SENTRY_DSN: str | None = None
+    SENTRY_ENVIRONMENT: str = "development"
 
     class Config:
         env_file = ".env"

@@ -1,6 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.models.listing_image import ListingImage
+from app.config import settings
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn=settings.SENTRY_DSN,
+    environment=settings.SENTRY_ENVIRONMENT,
+    send_default_pii=False,
+)
 
 # Import models so SQLAlchemy registers all tables before create_all()
 from app.models import (
