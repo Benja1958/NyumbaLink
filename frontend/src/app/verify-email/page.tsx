@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Suspense,
   useEffect,
   useState,
 } from "react";
@@ -30,7 +31,7 @@ type VerificationStatus =
   | "expired"
   | "error";
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const searchParams =
     useSearchParams();
 
@@ -97,10 +98,7 @@ export default function VerifyEmailPage() {
               .toLowerCase()
               .includes("expired")
           ) {
-            setStatus(
-              "expired"
-            );
-
+            setStatus("expired");
             setMessage(
               "This verification link has expired."
             );
@@ -113,17 +111,13 @@ export default function VerifyEmailPage() {
           );
         }
 
-        setStatus(
-          "success"
-        );
+        setStatus("success");
 
         setMessage(
           "Your email address has been verified successfully."
         );
       } catch (error) {
-        setStatus(
-          "error"
-        );
+        setStatus("error");
 
         setMessage(
           error instanceof Error
@@ -162,9 +156,7 @@ export default function VerifyEmailPage() {
           : "Failed to resend verification email."
       );
     } finally {
-      setResending(
-        false
-      );
+      setResending(false);
     }
   }
 
@@ -172,8 +164,7 @@ export default function VerifyEmailPage() {
     <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-green-50 via-white to-emerald-50 px-6 py-12">
       <div className="w-full max-w-md rounded-3xl border border-green-100 bg-white p-8 text-center shadow-sm">
 
-        {status ===
-          "verifying" && (
+        {status === "verifying" && (
           <>
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-green-700 border-t-transparent" />
@@ -189,8 +180,7 @@ export default function VerifyEmailPage() {
           </>
         )}
 
-        {status ===
-          "success" && (
+        {status === "success" && (
           <>
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-700 shadow-sm">
               <Check className="h-10 w-10 text-white" />
@@ -215,8 +205,7 @@ export default function VerifyEmailPage() {
           </>
         )}
 
-        {status ===
-          "expired" && (
+        {status === "expired" && (
           <>
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-amber-100">
               <MailWarning className="h-10 w-10 text-amber-700" />
@@ -231,9 +220,8 @@ export default function VerifyEmailPage() {
             </p>
 
             <p className="mt-2 text-sm text-gray-500">
-              Request a new
-              verification email and
-              try again.
+              Request a new verification
+              email and try again.
             </p>
 
             <button
@@ -262,8 +250,7 @@ export default function VerifyEmailPage() {
           </>
         )}
 
-        {status ===
-          "error" && (
+        {status === "error" && (
           <>
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
               <MailWarning className="h-10 w-10 text-red-600" />
@@ -285,8 +272,35 @@ export default function VerifyEmailPage() {
             </Link>
           </>
         )}
-
       </div>
     </main>
+  );
+}
+
+function VerifyEmailFallback() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-green-50 via-white to-emerald-50 px-6 py-12">
+      <div className="w-full max-w-md rounded-3xl border border-green-100 bg-white p-8 text-center shadow-sm">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-green-700 border-t-transparent" />
+        </div>
+
+        <h1 className="mt-6 text-3xl font-bold text-gray-900">
+          Loading
+        </h1>
+      </div>
+    </main>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense
+      fallback={
+        <VerifyEmailFallback />
+      }
+    >
+      <VerifyEmailContent />
+    </Suspense>
   );
 }
