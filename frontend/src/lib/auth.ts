@@ -16,6 +16,8 @@ export type User = {
   phone_number: string;
   role: UserRole;
   created_at: string;
+  email_verified: boolean;
+  email_verified_at: string | null;
 };
 
 export type SignupPayload = {
@@ -100,6 +102,64 @@ export async function signupUser(
 
   return response.json();
 }
+
+
+export async function resendVerificationEmail(): Promise<{
+  message: string;
+}> {
+  const response = await fetch(
+    "/backend-api/auth/email-verification/send",
+    {
+      method: "POST",
+      credentials: "include",
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      typeof data.detail === "string"
+        ? data.detail
+        : "Failed to send verification email"
+    );
+  }
+
+  return data;
+}
+
+export async function resendVerificationEmailByEmail(
+  email: string
+): Promise<{
+  message: string;
+}> {
+  const response = await fetch(
+    "/backend-api/auth/email-verification/resend",
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      typeof data.detail === "string"
+        ? data.detail
+        : "Failed to send verification email"
+    );
+  }
+
+  return data;
+}
+
 
 export async function loginUser(
   payload: LoginPayload

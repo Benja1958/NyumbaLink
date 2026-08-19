@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     SENTRY_DSN: str | None = None
     SENTRY_ENVIRONMENT: str = "development"
 
+    #resend
+    RESEND_API_KEY: str
+    EMAIL_FROM: str
+    FRONTEND_URL: str = "http://localhost:3000"
+
     class Config:
         env_file = ".env"
 

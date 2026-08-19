@@ -20,6 +20,7 @@ type AuthContextType = {
   isAuthenticated: boolean;
   login: (user: User) => void;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext =
@@ -37,6 +38,42 @@ export function AuthProvider({
 
   const [loading, setLoading] =
     useState(true);
+
+  async function refreshUser() {
+    try {
+      const currentUser =
+        await getCurrentUser();
+
+      setUser(currentUser);
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify(currentUser)
+      );
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === "UNAUTHORIZED"
+      ) {
+        localStorage.removeItem(
+          "access_token"
+        );
+
+        localStorage.removeItem(
+          "user"
+        );
+
+        setUser(null);
+      } else {
+        console.error(
+          "Unable to refresh user:",
+          error
+        );
+      }
+
+      throw error;
+    }
+  }
 
   useEffect(() => {
     async function loadUser() {
@@ -56,36 +93,10 @@ export function AuthProvider({
       }
 
       try {
-        const currentUser =
-          await getCurrentUser();
-
-        setUser(currentUser);
-
-        localStorage.setItem(
-          "user",
-          JSON.stringify(currentUser)
-        );
-      } catch (error) {
-        if (
-          error instanceof Error &&
-          error.message ===
-            "UNAUTHORIZED"
-        ) {
-          localStorage.removeItem(
-            "access_token"
-          );
-
-          localStorage.removeItem(
-            "user"
-          );
-
-          setUser(null);
-        } else {
-          console.error(
-            "Unable to verify session:",
-            error
-          );
-        }
+        await refreshUser();
+      } catch {
+        // refreshUser already handles
+        // authentication/session cleanup.
       } finally {
         setLoading(false);
       }
@@ -131,6 +142,7 @@ export function AuthProvider({
         isAuthenticated: !!user,
         login,
         logout,
+        refreshUser,
       }}
     >
       {children}

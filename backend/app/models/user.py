@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Boolean, Column, Integer, String, DateTime
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
@@ -11,20 +11,49 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     full_name = Column(String, nullable=False)
-    email = Column(String, unique=True, index=True, nullable=False)
-    phone_number = Column(String, unique=True, index=True, nullable=True)
+    email = Column(
+        String,
+        unique=True,
+        index=True,
+        nullable=False,
+    )
+    phone_number = Column(
+        String,
+        unique=True,
+        index=True,
+        nullable=True,
+    )
 
     password_hash = Column(String, nullable=False)
 
-    role = Column(String, nullable=False, default="tenant")
+    role = Column(
+        String,
+        nullable=False,
+        default="tenant",
+    )
     # possible roles: tenant, landlord, admin
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    email_verified = Column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
+    email_verified_at = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+    )
 
     favorites = relationship(
-        "Favorite", 
-        back_populates="tenant", 
-        cascade="all, delete-orphan")
+        "Favorite",
+        back_populates="tenant",
+        cascade="all, delete-orphan",
+    )
 
     tenant_conversations = relationship(
         "Conversation",
@@ -55,4 +84,10 @@ class User(Base):
         "Report",
         foreign_keys="Report.reviewed_by",
         back_populates="reviewer",
+    )
+
+    email_verification_tokens = relationship(
+        "EmailVerificationToken",
+        back_populates="user",
+        cascade="all, delete-orphan",
     )

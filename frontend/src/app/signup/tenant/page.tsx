@@ -1,16 +1,36 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import {
+  FormEvent,
+  useState,
+} from "react";
 
-import { signupUser } from "@/lib/auth";
+import Link from "next/link";
+import {
+  useRouter,
+} from "next/navigation";
+
+import {
+  MailCheck,
+} from "lucide-react";
+
+import {
+  signupUser,
+} from "@/lib/auth";
 
 export default function TenantSignupPage() {
   const router = useRouter();
 
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [error, setError] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [
+    verificationEmail,
+    setVerificationEmail,
+  ] = useState("");
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
@@ -20,18 +40,34 @@ export default function TenantSignupPage() {
     setError("");
     setLoading(true);
 
-    const formData = new FormData(event.currentTarget);
+    const formData =
+      new FormData(
+        event.currentTarget
+      );
 
-    const password = formData
-      .get("password")
-      ?.toString() ?? "";
+    const email =
+      formData
+        .get("email")
+        ?.toString() ?? "";
 
-    const confirmPassword = formData
-      .get("confirm_password")
-      ?.toString() ?? "";
+    const password =
+      formData
+        .get("password")
+        ?.toString() ?? "";
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
+    const confirmPassword =
+      formData
+        .get("confirm_password")
+        ?.toString() ?? "";
+
+    if (
+      password !==
+      confirmPassword
+    ) {
+      setError(
+        "Passwords do not match"
+      );
+
       setLoading(false);
       return;
     }
@@ -39,17 +75,28 @@ export default function TenantSignupPage() {
     try {
       await signupUser({
         full_name:
-          formData.get("full_name")?.toString() ?? "",
-        email:
-          formData.get("email")?.toString() ?? "",
+          formData
+            .get("full_name")
+            ?.toString() ?? "",
+
+        email,
+
         phone_number:
-          formData.get("phone_number")?.toString() ?? "",
+          formData
+            .get("phone_number")
+            ?.toString() ?? "",
+
         password,
-        confirm_password: confirmPassword,
+
+        confirm_password:
+          confirmPassword,
+
         role: "tenant",
       });
 
-      router.push("/login");
+      setVerificationEmail(
+        email
+      );
     } catch (error) {
       setError(
         error instanceof Error
@@ -59,6 +106,56 @@ export default function TenantSignupPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (verificationEmail) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-green-50 px-6 py-12">
+        <div className="w-full max-w-md rounded-2xl border border-green-100 bg-white p-8 text-center shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+            <MailCheck className="h-7 w-7 text-green-700" />
+          </div>
+
+          <h1 className="mt-6 text-3xl font-bold text-gray-900">
+            Check your email
+          </h1>
+
+          <p className="mt-3 text-gray-600">
+            We sent a verification link to
+          </p>
+
+          <p className="mt-1 font-medium text-gray-900">
+            {verificationEmail}
+          </p>
+
+          <p className="mt-4 text-sm leading-6 text-gray-500">
+            Verify your email address
+            before logging in and
+            browsing properties.
+          </p>
+
+          <button
+            type="button"
+            onClick={() =>
+              router.push("/login")
+            }
+            className="mt-8 w-full rounded-lg bg-green-800 py-3 font-medium text-white transition hover:bg-green-900"
+          >
+            Continue to Login
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              setVerificationEmail("")
+            }
+            className="mt-4 text-sm font-medium text-gray-600 hover:text-gray-900"
+          >
+            Use a different email
+          </button>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -76,7 +173,8 @@ export default function TenantSignupPage() {
         </h1>
 
         <p className="mt-2 text-gray-600">
-          Create your account to start browsing homes.
+          Create your account to start
+          browsing homes.
         </p>
 
         <form

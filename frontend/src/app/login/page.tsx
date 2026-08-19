@@ -8,6 +8,8 @@ import {
 
 import Link from "next/link";
 
+import { toast } from "sonner";
+
 import {
   useRouter,
   useSearchParams,
@@ -18,10 +20,15 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
-import { loginUser } from "@/lib/auth";
+
+import {
+  loginUser,
+  resendVerificationEmailByEmail,
+} from "@/lib/auth";
 
 function LoginContent() {
   const router = useRouter();
+
   const searchParams =
     useSearchParams();
 
@@ -33,6 +40,16 @@ function LoginContent() {
   const [loading, setLoading] =
     useState(false);
 
+  const [
+    unverifiedEmail,
+    setUnverifiedEmail,
+  ] = useState("");
+
+  const [
+    resending,
+    setResending,
+  ] = useState(false);
+
   const sessionExpired =
     searchParams.get("reason") ===
     "session-expired";
@@ -43,6 +60,7 @@ function LoginContent() {
     event.preventDefault();
 
     setError("");
+    setUnverifiedEmail("");
     setLoading(true);
 
     const formData =
@@ -50,18 +68,21 @@ function LoginContent() {
         event.currentTarget
       );
 
+    const email =
+      formData
+        .get("email")
+        ?.toString() ?? "";
+
+    const password =
+      formData
+        .get("password")
+        ?.toString() ?? "";
+
     try {
       const data =
         await loginUser({
-          email:
-            formData
-              .get("email")
-              ?.toString() ?? "",
-
-          password:
-            formData
-              .get("password")
-              ?.toString() ?? "",
+          email,
+          password,
         });
 
       login(data.user);
@@ -82,13 +103,54 @@ function LoginContent() {
         router.push("/tenant");
       }
     } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Login failed";
+
+      setError(message);
+
+      if (
+        message ===
+        "Please verify your email before logging in"
+      ) {
+        setUnverifiedEmail(
+          email
+        );
+      } else {
+        setUnverifiedEmail(
+          ""
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleResendVerification() {
+    if (!unverifiedEmail) {
+      return;
+    }
+
+    try {
+      setResending(true);
+      setError("");
+
+      await resendVerificationEmailByEmail(
+        unverifiedEmail
+      );
+
+      toast.success(
+        "Verification email sent. Check your inbox."
+      );
+    } catch (error) {
       setError(
         error instanceof Error
           ? error.message
-          : "Login failed"
+          : "Failed to resend verification email"
       );
     } finally {
-      setLoading(false);
+      setResending(false);
     }
   }
 
@@ -107,8 +169,7 @@ function LoginContent() {
         </h1>
 
         <p className="mt-2 text-gray-600">
-          Welcome back to
-          NyumbaLink.
+          Welcome back to NyumbaLink.
         </p>
 
         {sessionExpired && (
@@ -157,6 +218,23 @@ function LoginContent() {
             <p className="text-sm text-red-600">
               {error}
             </p>
+          )}
+
+          {unverifiedEmail && (
+            <button
+              type="button"
+              onClick={
+                handleResendVerification
+              }
+              disabled={
+                resending
+              }
+              className="text-sm font-medium text-amber-700 underline underline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {resending
+                ? "Sending verification email..."
+                : "Resend verification email"}
+            </button>
           )}
 
           <button

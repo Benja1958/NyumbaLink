@@ -5,3 +5,6 @@ from app.models.conversation import Conversation
 from app.models.message import Message
 from app.models.listing_image import ListingImage
 from app.models.report import Report
+from app.models.email_verification_token import (
+    EmailVerificationToken,
+)

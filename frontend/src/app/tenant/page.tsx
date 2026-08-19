@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import SearchFilters from "@/components/SearchFilters";
 import EmptyState from "@/components/EmptyState";
 import PaginatedListings from "@/components/PaginatedListings";
+import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 
 import {
   Home,
@@ -87,10 +88,11 @@ export default async function TenantPage({
           </p>
         </div>
 
+        <EmailVerificationBanner />
+
         <SearchFilters />
 
-        {listings.length ===
-        0 ? (
+        {listings.length === 0 ? (
           <div className="mt-10">
             <EmptyState
               icon={Home}
