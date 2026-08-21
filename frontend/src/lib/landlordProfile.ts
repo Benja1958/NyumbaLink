@@ -29,8 +29,13 @@ export type UpdateLandlordProfilePayload = {
 export async function getLandlordProfile(
   landlordId: number
 ): Promise<LandlordProfile> {
+  const url =
+    typeof window === "undefined"
+      ? `${API_URL}/landlords/${landlordId}`
+      : `/backend-api/landlords/${landlordId}`;
+
   const response = await fetch(
-    `${API_URL}/landlords/${landlordId}`,
+    url,
     {
       cache: "no-store",
     }
