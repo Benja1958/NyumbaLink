@@ -91,3 +91,19 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+
+    profile_image_url = Column(
+        String,
+        nullable=True,
+    )
+
+    about = Column(
+        String,
+        nullable=True,
+    )
+
+    is_verified_landlord = Column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )

@@ -28,6 +28,7 @@ from app.routes import (
     messages,
     images,
     reports,
+    landlords,
 )
 
 
@@ -105,4 +106,10 @@ app.include_router(
     reports.router,
     prefix="/reports",
     tags=["Reports"],
+)
+
+app.include_router(
+    landlords.router,
+    prefix="/landlords",
+    tags=["Landlords"],
 )

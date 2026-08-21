@@ -1,9 +1,6 @@
 import { authFetch } from "@/lib/authFetch";
 import { Listing } from "@/types/listing";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
 async function getErrorMessage(
   response: Response,
   fallback: string
@@ -34,7 +31,7 @@ export type ListingPayload = {
 
 export async function getMyListings(): Promise<Listing[]> {
   const response = await authFetch(
-    `${API_URL}/listings/my-listings`
+    "/backend-api/listings/my-listings"
   );
 
   if (!response.ok) {
@@ -52,7 +49,7 @@ export async function getMyListings(): Promise<Listing[]> {
 export async function createListing(
   payload: ListingPayload
 ): Promise<Listing> {
-  const response = await authFetch(`${API_URL}/listings/`, {
+  const response = await authFetch("/backend-api/listings/", {
     method: "POST",
 
     headers: {
@@ -79,7 +76,7 @@ export async function updateListing(
   payload: ListingPayload
 ): Promise<Listing> {
   const response = await authFetch(
-    `${API_URL}/listings/${listingId}`,
+    `/backend-api/listings/${listingId}`,
     {
       method: "PATCH",
 
@@ -107,7 +104,7 @@ export async function deleteListing(
   listingId: number
 ): Promise<void> {
   const response = await authFetch(
-    `${API_URL}/listings/${listingId}`,
+    `/backend-api/listings/${listingId}`,
     {
       method: "DELETE",
     }
@@ -127,7 +124,7 @@ export async function resubmitListing(
   listingId: number
 ): Promise<Listing> {
   const response = await authFetch(
-    `${API_URL}/listings/${listingId}/resubmit`,
+    `/backend-api/listings/${listingId}/resubmit`,
     {
       method: "PATCH",
     }
@@ -149,7 +146,7 @@ export async function confirmListingAvailability(
   listingId: number
 ): Promise<Listing> {
   const response = await authFetch(
-    `${API_URL}/listings/${listingId}/confirm-availability`,
+    `/backend-api/listings/${listingId}/confirm-availability`,
     {
       method: "PATCH",
     }
@@ -171,7 +168,7 @@ export async function markListingAsRented(
   listingId: number
 ): Promise<Listing> {
   const response = await authFetch(
-    `${API_URL}/listings/${listingId}/mark-rented`,
+    `/backend-api/listings/${listingId}/mark-rented`,
     {
       method: "PATCH",
     }

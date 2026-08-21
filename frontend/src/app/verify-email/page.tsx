@@ -23,6 +23,7 @@ import {
 
 import {
   resendVerificationEmailByEmail,
+  verifyEmail,
 } from "@/lib/auth";
 
 type VerificationStatus =
@@ -57,7 +58,7 @@ function VerifyEmailContent() {
   ] = useState(false);
 
   useEffect(() => {
-    async function verifyEmail() {
+    async function verifyCurrentEmail() {
       if (!token) {
         setStatus("error");
         setMessage(
@@ -68,48 +69,7 @@ function VerifyEmailContent() {
       }
 
       try {
-        const response =
-          await fetch(
-            "/backend-api/auth/email-verification/verify",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
-              body: JSON.stringify({
-                token,
-              }),
-            }
-          );
-
-        const data =
-          await response.json();
-
-        if (!response.ok) {
-          const detail =
-            typeof data.detail ===
-            "string"
-              ? data.detail
-              : "Email verification failed.";
-
-          if (
-            detail
-              .toLowerCase()
-              .includes("expired")
-          ) {
-            setStatus("expired");
-            setMessage(
-              "This verification link has expired."
-            );
-
-            return;
-          }
-
-          throw new Error(
-            detail
-          );
-        }
+        await verifyEmail(token);
 
         setStatus("success");
 
@@ -117,17 +77,33 @@ function VerifyEmailContent() {
           "Your email address has been verified successfully."
         );
       } catch (error) {
+        const detail =
+          error instanceof Error
+            ? error.message
+            : "Email verification failed.";
+
+        if (
+          detail
+            .toLowerCase()
+            .includes("expired")
+        ) {
+          setStatus("expired");
+          setMessage(
+            "This verification link has expired."
+          );
+
+          return;
+        }
+
         setStatus("error");
 
         setMessage(
-          error instanceof Error
-            ? error.message
-            : "Email verification failed."
+          detail
         );
       }
     }
 
-    verifyEmail();
+    verifyCurrentEmail();
   }, [token]);
 
   async function handleResend() {

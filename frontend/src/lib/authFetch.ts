@@ -1,7 +1,3 @@
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:8000";
-
 let refreshPromise:
   Promise<boolean> | null = null;
 
@@ -87,7 +83,7 @@ async function performRefresh():
   try {
     const response =
       await fetch(
-        `${API_URL}/auth/refresh`,
+        "/backend-api/auth/refresh",
         {
           method: "POST",
           credentials: "include",

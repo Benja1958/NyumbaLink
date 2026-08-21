@@ -1,9 +1,5 @@
 import { authFetch } from "@/lib/authFetch";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:8000";
-
 export type UserRole =
   | "tenant"
   | "landlord"
@@ -78,7 +74,7 @@ export async function signupUser(
   payload: SignupPayload
 ): Promise<User> {
   const response = await fetch(
-    `${API_URL}/auth/signup`,
+    "/backend-api/auth/signup",
     {
       method: "POST",
       credentials: "include",
@@ -107,11 +103,10 @@ export async function signupUser(
 export async function resendVerificationEmail(): Promise<{
   message: string;
 }> {
-  const response = await fetch(
+  const response = await authFetch(
     "/backend-api/auth/email-verification/send",
     {
       method: "POST",
-      credentials: "include",
     }
   );
 
@@ -160,12 +155,43 @@ export async function resendVerificationEmailByEmail(
   return data;
 }
 
+export async function verifyEmail(
+  token: string
+): Promise<{
+  message: string;
+}> {
+  const response = await fetch(
+    "/backend-api/auth/email-verification/verify",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        token,
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      typeof data.detail === "string"
+        ? data.detail
+        : "Email verification failed."
+    );
+  }
+
+  return data;
+}
+
 
 export async function loginUser(
   payload: LoginPayload
 ): Promise<LoginResponse> {
   const response = await fetch(
-    `${API_URL}/auth/login`,
+    "/backend-api/auth/login",
     {
       method: "POST",
       credentials: "include",
@@ -191,15 +217,15 @@ export async function loginUser(
 }
 
 export async function getCurrentUser(): Promise<User> {
-  const response =
-    await authFetch(
-      `${API_URL}/auth/me`,
-      {
-        method: "GET",
-      }
-    );
+  const response = await authFetch(
+    "/backend-api/auth/me"
+  );
 
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("UNAUTHORIZED");
+    }
+
     throw new Error(
       "Failed to fetch current user"
     );
@@ -209,11 +235,10 @@ export async function getCurrentUser(): Promise<User> {
 }
 
 export async function logoutUser(): Promise<void> {
-  const response = await fetch(
-    `${API_URL}/auth/logout`,
+  const response = await authFetch(
+    "/backend-api/auth/logout",
     {
       method: "POST",
-      credentials: "include",
     }
   );
 

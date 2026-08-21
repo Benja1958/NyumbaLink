@@ -1,10 +1,6 @@
 import { authFetch } from "@/lib/authFetch";
 import { Listing } from "@/types/listing";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:8000";
-
 async function getErrorMessage(
   response: Response,
   fallback: string
@@ -22,11 +18,16 @@ async function getErrorMessage(
   }
 }
 
+
+// =====================================================
+// Listings
+// =====================================================
+
 export async function getAllAdminListings(): Promise<
   Listing[]
 > {
   const response = await authFetch(
-    `${API_URL}/admin/listings`
+    "/backend-api/admin/listings"
   );
 
   if (!response.ok) {
@@ -41,11 +42,12 @@ export async function getAllAdminListings(): Promise<
   return response.json();
 }
 
+
 export async function getPendingListings(): Promise<
   Listing[]
 > {
   const response = await authFetch(
-    `${API_URL}/admin/listings/pending`
+    "/backend-api/admin/listings/pending"
   );
 
   if (!response.ok) {
@@ -60,11 +62,12 @@ export async function getPendingListings(): Promise<
   return response.json();
 }
 
+
 export async function approveListing(
   listingId: number
 ): Promise<Listing> {
   const response = await authFetch(
-    `${API_URL}/admin/listings/${listingId}/approve`,
+    `/backend-api/admin/listings/${listingId}/approve`,
     {
       method: "PATCH",
     }
@@ -82,16 +85,18 @@ export async function approveListing(
   return response.json();
 }
 
+
 export async function rejectListing(
   listingId: number,
   reason: string
 ): Promise<Listing> {
   const response = await authFetch(
-    `${API_URL}/admin/listings/${listingId}/reject`,
+    `/backend-api/admin/listings/${listingId}/reject`,
     {
       method: "PATCH",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type":
+          "application/json",
       },
       body: JSON.stringify({
         reason,
@@ -100,24 +105,102 @@ export async function rejectListing(
   );
 
   if (!response.ok) {
-    let message =
-      "Failed to reject listing";
-
-    try {
-      const data =
-        await response.json();
-
-      if (
-        typeof data.detail === "string"
-      ) {
-        message = data.detail;
-      }
-    } catch {
-      // Keep fallback message.
-    }
-
-    throw new Error(message);
+    throw new Error(
+      await getErrorMessage(
+        response,
+        "Failed to reject listing"
+      )
+    );
   }
 
   return response.json();
+}
+
+
+// =====================================================
+// Landlords
+// =====================================================
+
+export type AdminLandlord = {
+  id: number;
+
+  full_name: string;
+
+  email: string;
+
+  profile_image_url:
+    | string
+    | null;
+
+  email_verified: boolean;
+
+  is_verified_landlord:
+    boolean;
+
+  approved_listings_count:
+    number;
+
+  created_at: string;
+};
+
+
+export async function getAdminLandlords(): Promise<
+  AdminLandlord[]
+> {
+  const response = await authFetch(
+    "/backend-api/admin/landlords"
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      await getErrorMessage(
+        response,
+        "Failed to load landlords"
+      )
+    );
+  }
+
+  return response.json();
+}
+
+
+export async function verifyLandlord(
+  landlordId: number
+): Promise<void> {
+  const response = await authFetch(
+    `/backend-api/admin/landlords/${landlordId}/verify`,
+    {
+      method: "PATCH",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      await getErrorMessage(
+        response,
+        "Failed to verify landlord"
+      )
+    );
+  }
+}
+
+
+export async function unverifyLandlord(
+  landlordId: number
+): Promise<void> {
+  const response = await authFetch(
+    `/backend-api/admin/landlords/${landlordId}/unverify`,
+    {
+      method: "PATCH",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      await getErrorMessage(
+        response,
+        "Failed to remove landlord verification"
+      )
+    );
+  }
 }

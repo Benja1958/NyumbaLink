@@ -1,9 +1,5 @@
 import { authFetch } from "@/lib/authFetch";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:8000";
-
 export const REPORT_REASONS = [
   "Property does not exist",
   "Incorrect information",
@@ -74,7 +70,7 @@ export async function createReport(
   details: string
 ): Promise<Report> {
   const response = await authFetch(
-    `${API_URL}/reports/listings/${listingId}`,
+    `/backend-api/reports/listings/${listingId}`,
     {
       method: "POST",
       headers: {
@@ -103,7 +99,7 @@ export async function getMyReports(): Promise<
   Report[]
 > {
   const response = await authFetch(
-    `${API_URL}/reports/my-reports`
+    "/backend-api/reports/my-reports"
   );
 
   if (!response.ok) {
@@ -126,7 +122,7 @@ export async function getAdminReports(
     : "";
 
   const response = await authFetch(
-    `${API_URL}/admin/reports${query}`
+    `/backend-api/admin/reports${query}`
   );
 
   if (!response.ok) {
@@ -145,7 +141,7 @@ export async function dismissReport(
   reportId: number
 ): Promise<AdminReport> {
   const response = await authFetch(
-    `${API_URL}/admin/reports/${reportId}/dismiss`,
+    `/backend-api/admin/reports/${reportId}/dismiss`,
     {
       method: "PATCH",
     }
@@ -167,7 +163,7 @@ export async function suspendReportedListing(
   reportId: number
 ): Promise<AdminReport> {
   const response = await authFetch(
-    `${API_URL}/admin/reports/${reportId}/suspend-listing`,
+    `/backend-api/admin/reports/${reportId}/suspend-listing`,
     {
       method: "PATCH",
     }

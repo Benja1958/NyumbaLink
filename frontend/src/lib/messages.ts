@@ -54,10 +54,6 @@ export type ConversationWithMessages =
 
 export const MESSAGE_POLL_INTERVAL = 7000;
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:8000";
-
 async function getErrorMessage(
   response: Response,
   fallback: string
@@ -83,7 +79,7 @@ export async function createConversation(
   listingId: number
 ): Promise<Conversation> {
   const response = await authFetch(
-    `${API_URL}/messages/conversations`,
+    "/backend-api/messages/conversations",
     {
       method: "POST",
       headers: {
@@ -112,7 +108,7 @@ export async function getConversations(): Promise<
   Conversation[]
 > {
   const response = await authFetch(
-    `${API_URL}/messages/conversations`
+    "/backend-api/messages/conversations"
   );
 
   if (!response.ok) {
@@ -131,7 +127,7 @@ export async function getConversation(
   conversationId: number
 ): Promise<ConversationWithMessages> {
   const response = await authFetch(
-    `${API_URL}/messages/conversations/${conversationId}`
+    `/backend-api/messages/conversations/${conversationId}`
   );
 
   if (!response.ok) {
@@ -151,7 +147,7 @@ export async function sendMessage(
   content: string
 ): Promise<Message> {
   const response = await authFetch(
-    `${API_URL}/messages/conversations/${conversationId}/messages`,
+    `/backend-api/messages/conversations/${conversationId}/messages`,
     {
       method: "POST",
       headers: {

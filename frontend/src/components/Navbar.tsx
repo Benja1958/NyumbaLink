@@ -54,7 +54,11 @@ export default function Navbar() {
     <header className="border-b border-gray-200 bg-white">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <Link
-          href={isAuthenticated ? homeHref : "/"}
+          href={
+            isAuthenticated
+              ? homeHref
+              : "/"
+          }
           className="flex items-center gap-2"
         >
           <House className="h-7 w-7 text-indigo-600" />
@@ -65,9 +69,12 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-4">
-          {!loading && isAuthenticated && user ? (
+          {!loading &&
+          isAuthenticated &&
+          user ? (
             <>
-              {user.role === "tenant" && (
+              {user.role ===
+                "tenant" && (
                 <Link
                   href="/tenant/favorites"
                   className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-950"
@@ -77,7 +84,8 @@ export default function Navbar() {
                 </Link>
               )}
 
-              {user.role === "landlord" && (
+              {user.role ===
+                "landlord" && (
                 <Link
                   href="/landlord"
                   className="text-sm font-medium text-gray-700 hover:text-gray-950"
@@ -86,7 +94,8 @@ export default function Navbar() {
                 </Link>
               )}
 
-              {user.role === "admin" && (
+              {user.role ===
+                "admin" && (
                 <>
                   <Link
                     href="/admin"
@@ -101,15 +110,25 @@ export default function Navbar() {
                   >
                     Reports
                   </Link>
+
+                  <Link
+                    href="/admin/landlords"
+                    className="text-sm font-medium text-gray-700 hover:text-gray-950"
+                  >
+                    Landlords
+                  </Link>
                 </>
               )}
 
-              {(user.role === "tenant" ||
-                user.role === "landlord") && (
+              {(user.role ===
+                "tenant" ||
+                user.role ===
+                  "landlord") && (
                 <div className="flex items-center gap-2">
                   <Link
                     href={
-                      user.role === "tenant"
+                      user.role ===
+                      "tenant"
                         ? "/tenant/messages"
                         : "/landlord/messages"
                     }
@@ -118,9 +137,11 @@ export default function Navbar() {
                     <span className="relative">
                       <MessageSquare className="h-5 w-5" />
 
-                      {unreadCount > 0 && (
+                      {unreadCount >
+                        0 && (
                         <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
-                          {unreadCount > 99
+                          {unreadCount >
+                          99
                             ? "99+"
                             : unreadCount}
                         </span>
@@ -132,13 +153,24 @@ export default function Navbar() {
                 </div>
               )}
 
-              <span className="text-sm text-gray-600">
-                {user.full_name}
-              </span>
+             {user.role === "landlord" ? (
+                <Link
+                  href="/landlord/profile"
+                  className="text-sm font-medium text-gray-700 hover:text-gray-950"
+                >
+                  {user.full_name}
+                </Link>
+              ) : (
+                <span className="text-sm text-gray-600">
+                  {user.full_name}
+                </span>
+              )}
 
               <button
                 type="button"
-                onClick={handleLogout}
+                onClick={
+                  handleLogout
+                }
                 className="text-sm font-medium text-gray-700 hover:text-gray-950"
               >
                 Logout

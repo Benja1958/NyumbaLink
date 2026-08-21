@@ -70,3 +70,27 @@ class VerifyEmailRequest(BaseModel):
 
 class ResendVerificationRequest(BaseModel):
     email: EmailStr
+
+class LandlordProfileResponse(BaseModel):
+    id: int
+    full_name: str
+    email: EmailStr
+    phone_number: Optional[str] = None
+
+    profile_image_url: Optional[str] = None
+    about: Optional[str] = None
+
+    email_verified: bool
+    is_verified_landlord: bool
+
+    approved_listings_count: int = 0
+
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class LandlordProfileUpdate(BaseModel):
+    full_name: Optional[str] = None
+    about: Optional[str] = None

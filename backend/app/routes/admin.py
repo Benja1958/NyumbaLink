@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 from typing import List
+from sqlalchemy import func
 
 from app.database import get_db
 from app.dependencies.auth import require_admin
@@ -238,3 +239,145 @@ def suspend_reported_listing(
     db.refresh(report)
 
     return report
+
+
+@router.patch(
+    "/landlords/{landlord_id}/verify",
+)
+def verify_landlord(
+    landlord_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+    _: None = Depends(verify_csrf_token),
+):
+    landlord = (
+        db.query(User)
+        .filter(
+            User.id == landlord_id,
+            User.role == "landlord",
+        )
+        .first()
+    )
+
+    if not landlord:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Landlord not found",
+        )
+
+    if not landlord.email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Landlord email must be "
+                "verified first"
+            ),
+        )
+
+    landlord.is_verified_landlord = True
+
+    db.commit()
+    db.refresh(landlord)
+
+    return {
+        "message":
+            "Landlord verified successfully",
+        "landlord_id":
+            landlord.id,
+        "is_verified_landlord":
+            landlord.is_verified_landlord,
+    }
+
+
+@router.patch(
+    "/landlords/{landlord_id}/unverify",
+)
+def unverify_landlord(
+    landlord_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+    _: None = Depends(verify_csrf_token),
+):
+    landlord = (
+        db.query(User)
+        .filter(
+            User.id == landlord_id,
+            User.role == "landlord",
+        )
+        .first()
+    )
+
+    if not landlord:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Landlord not found",
+        )
+
+    landlord.is_verified_landlord = False
+
+    db.commit()
+    db.refresh(landlord)
+
+    return {
+        "message":
+            "Landlord verification removed",
+        "landlord_id":
+            landlord.id,
+        "is_verified_landlord":
+            landlord.is_verified_landlord,
+    }
+
+
+@router.get(
+    "/landlords",
+)
+def get_landlords(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    landlords = (
+        db.query(User)
+        .filter(
+            User.role == "landlord"
+        )
+        .order_by(
+            User.created_at.desc()
+        )
+        .all()
+    )
+
+    results = []
+
+    for landlord in landlords:
+        approved_listings_count = (
+            db.query(func.count(Listing.id))
+            .filter(
+                Listing.landlord_id
+                == landlord.id,
+                Listing.approval_status
+                == "approved",
+            )
+            .scalar()
+        )
+
+        results.append(
+            {
+                "id": landlord.id,
+                "full_name":
+                    landlord.full_name,
+                "email":
+                    landlord.email,
+                "profile_image_url":
+                    landlord.profile_image_url,
+                "email_verified":
+                    landlord.email_verified,
+                "is_verified_landlord":
+                    landlord.is_verified_landlord,
+                "approved_listings_count":
+                    approved_listings_count,
+                "created_at":
+                    landlord.created_at,
+            }
+        )
+
+    return results

@@ -1,10 +1,6 @@
 import { authFetch } from "@/lib/authFetch";
 import { ListingImage } from "@/types/listing";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:8000";
-
 async function getErrorMessage(
   response: Response,
   fallback: string
@@ -37,7 +33,7 @@ export async function uploadListingImages(
   }
 
   const response = await authFetch(
-    `${API_URL}/listings/${listingId}/images`,
+    `/backend-api/listings/${listingId}/images`,
     {
       method: "POST",
       body: formData,
@@ -61,7 +57,7 @@ export async function deleteListingImage(
   imageId: number
 ): Promise<void> {
   const response = await authFetch(
-    `${API_URL}/listings/${listingId}/images/${imageId}`,
+    `/backend-api/listings/${listingId}/images/${imageId}`,
     {
       method: "DELETE",
     }
@@ -82,7 +78,7 @@ export async function setListingCoverImage(
   imageId: number
 ): Promise<ListingImage> {
   const response = await authFetch(
-    `${API_URL}/listings/${listingId}/images/${imageId}/cover`,
+    `/backend-api/listings/${listingId}/images/${imageId}/cover`,
     {
       method: "PATCH",
     }
