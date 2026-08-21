@@ -102,6 +102,10 @@ def reject_listing(
         timezone.utc
     )
 
+    listing.is_verified_property = False
+    listing.property_verified_at = None
+    listing.property_verified_by = None
+
     db.commit()
     db.refresh(listing)
 
@@ -234,6 +238,10 @@ def suspend_reported_listing(
     report.reviewed_at = datetime.now(
         timezone.utc
     )
+    
+    listing.is_verified_property = False
+    listing.property_verified_at = None
+    listing.property_verified_by = None
 
     db.commit()
     db.refresh(report)
@@ -381,3 +389,90 @@ def get_landlords(
         )
 
     return results
+
+
+@router.patch(
+    "/listings/{listing_id}/verify-property",
+    response_model=ListingResponse,
+)
+def verify_property(
+    listing_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+    _: None = Depends(verify_csrf_token),
+):
+    listing = (
+        db.query(Listing)
+        .filter(Listing.id == listing_id)
+        .first()
+    )
+
+    if not listing:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Listing not found",
+        )
+
+    if listing.approval_status != "approved":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Only approved listings can be "
+                "verified"
+            ),
+        )
+
+    if listing.is_verified_property:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Property is already verified",
+        )
+
+    listing.is_verified_property = True
+    listing.property_verified_at = datetime.now(
+        timezone.utc
+    )
+    listing.property_verified_by = current_user.id
+
+    db.commit()
+    db.refresh(listing)
+
+    return listing
+
+
+@router.patch(
+    "/listings/{listing_id}/unverify-property",
+    response_model=ListingResponse,
+)
+def unverify_property(
+    listing_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+    _: None = Depends(verify_csrf_token),
+):
+    listing = (
+        db.query(Listing)
+        .filter(Listing.id == listing_id)
+        .first()
+    )
+
+    if not listing:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Listing not found",
+        )
+
+    if not listing.is_verified_property:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Property is not verified",
+        )
+
+    listing.is_verified_property = False
+    listing.property_verified_at = None
+    listing.property_verified_by = None
+
+    db.commit()
+    db.refresh(listing)
+
+    return listing

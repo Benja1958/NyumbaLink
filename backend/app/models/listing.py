@@ -13,7 +13,6 @@ from sqlalchemy import (
 
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from sqlalchemy import Text
 from app.database import Base
 
 
@@ -49,6 +48,23 @@ class Listing(Base):
     is_available = Column(Boolean, default=True)
     is_approved = Column(Boolean, default=False)
     approval_status = Column(String, nullable=False, default="pending")
+
+    is_verified_property = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+    )
+
+    property_verified_at = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    property_verified_by = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=True,
+    )
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

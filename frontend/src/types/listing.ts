@@ -22,10 +22,11 @@ export type Listing = {
   is_available: boolean;
   is_approved: boolean;
   approval_status: string;
+  is_verified_property: boolean;
+  property_verified_at?: string | null;
   rejection_reason?: string | null;
   rejected_at?: string | null;
   rejected_by?: number | null;
   created_at: string;
   last_availability_confirmed_at?: string | null;
-  
 };

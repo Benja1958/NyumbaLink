@@ -117,6 +117,52 @@ export async function rejectListing(
 }
 
 
+export async function verifyProperty(
+  listingId: number
+): Promise<Listing> {
+  const response = await authFetch(
+    `/backend-api/admin/listings/${listingId}/verify-property`,
+    {
+      method: "PATCH",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      await getErrorMessage(
+        response,
+        "Failed to verify property"
+      )
+    );
+  }
+
+  return response.json();
+}
+
+
+export async function unverifyProperty(
+  listingId: number
+): Promise<Listing> {
+  const response = await authFetch(
+    `/backend-api/admin/listings/${listingId}/unverify-property`,
+    {
+      method: "PATCH",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      await getErrorMessage(
+        response,
+        "Failed to remove property verification"
+      )
+    );
+  }
+
+  return response.json();
+}
+
+
 // =====================================================
 // Landlords
 // =====================================================

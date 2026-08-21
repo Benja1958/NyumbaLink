@@ -51,14 +51,6 @@ export default async function ListingPage({
     throw error;
   }
 
-  const approvalStatus =
-    property.approval_status ??
-    (
-      property.is_approved
-        ? "approved"
-        : "pending"
-    );
-
   const landlord =
     await getLandlordProfile(
       property.landlord_id
@@ -101,11 +93,10 @@ export default async function ListingPage({
                   {property.title}
                 </h1>
 
-                {approvalStatus ===
-                  "approved" && (
+                {property.is_verified_property && (
                   <span className="flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
                     <CheckCircle2 className="h-4 w-4" />
-                    Verified
+                    Verified Property
                   </span>
                 )}
 
