@@ -6,8 +6,11 @@ import {
 } from "react";
 
 import {
+  BarChart3,
   ClipboardCheck,
 } from "lucide-react";
+
+import Link from "next/link";
 
 import { toast } from "sonner";
 
@@ -277,15 +280,25 @@ export default function AdminPage() {
       <Navbar />
 
       <main className="mx-auto max-w-7xl px-6 py-10">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Admin Dashboard
-          </h1>
+        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Admin Dashboard
+            </h1>
 
-          <p className="mt-2 text-gray-600">
-            Review listings and manage
-            property verification.
-          </p>
+            <p className="mt-2 text-gray-600">
+              Review listings and manage
+              property verification.
+            </p>
+          </div>
+
+          <Link
+            href="/admin/analytics"
+            className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-3 font-medium text-gray-700 hover:bg-gray-50"
+          >
+            <BarChart3 className="h-5 w-5" />
+            Analytics
+          </Link>
         </div>
 
         {error && (
