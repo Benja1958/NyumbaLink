@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import List
 from sqlalchemy import func
 
@@ -12,6 +12,10 @@ from app.models.listing import Listing
 from app.models.user import User
 from app.models.report import Report
 
+from app.schemas.analytics import (
+    AdminAnalyticsResponse,
+    ReportsBreakdown,
+)
 from app.schemas.report import AdminReportResponse
 from app.schemas.listing import (
     ListingRejectRequest,
@@ -20,6 +24,62 @@ from app.schemas.listing import (
 
 
 router = APIRouter()
+
+
+@router.get(
+    "/analytics",
+    response_model=AdminAnalyticsResponse,
+)
+def get_admin_analytics(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    active_since = datetime.now(timezone.utc) - timedelta(days=30)
+
+    active_users = (
+        db.query(func.count(User.id))
+        .filter(
+            User.role != "admin",
+            User.last_login_at >= active_since,
+        )
+        .scalar()
+    )
+
+    listings_created = db.query(func.count(Listing.id)).scalar()
+
+    pending_approvals = (
+        db.query(func.count(Listing.id))
+        .filter(Listing.approval_status == "pending")
+        .scalar()
+    )
+
+    suspended_listings = (
+        db.query(func.count(Listing.id))
+        .filter(Listing.approval_status == "suspended")
+        .scalar()
+    )
+
+    reports_by_status = dict(
+        db.query(
+            Report.status,
+            func.count(Report.id),
+        )
+        .group_by(Report.status)
+        .all()
+    )
+
+    return AdminAnalyticsResponse(
+        active_users=active_users or 0,
+        listings_created=listings_created or 0,
+        pending_approvals=pending_approvals or 0,
+        suspended_listings=suspended_listings or 0,
+        reports_received=sum(reports_by_status.values()),
+        reports_breakdown=ReportsBreakdown(
+            pending=reports_by_status.get("pending", 0),
+            dismissed=reports_by_status.get("dismissed", 0),
+            action_taken=reports_by_status.get("action_taken", 0),
+        ),
+    )
 
 
 @router.get("/listings", response_model=List[ListingResponse])
