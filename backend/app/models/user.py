@@ -107,3 +107,8 @@ class User(Base):
         default=False,
         nullable=False,
     )
+
+    last_login_at = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )

@@ -112,3 +112,15 @@ class Listing(Base):
         DateTime(timezone=True),
         nullable=True,
     )
+
+    views_count = Column(
+        Integer,
+        nullable=False,
+        default=0,
+    )
+
+    availability_confirmations_count = Column(
+        Integer,
+        nullable=False,
+        default=0,
+    )

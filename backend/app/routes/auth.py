@@ -177,6 +177,12 @@ def login(
             ),
         )
 
+    user.last_login_at = datetime.now(
+        timezone.utc
+    )
+
+    db.commit()
+
     token_data = {
         "sub": str(user.id),
         "email": user.email,

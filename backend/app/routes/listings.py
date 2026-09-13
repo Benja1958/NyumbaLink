@@ -1,13 +1,25 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime, timezone
 
 from app.database import get_db
+from app.models.conversation import Conversation
+from app.models.favorite import Favorite
 from app.models.listing import Listing
+from app.models.message import Message
 from app.models.user import User
+from app.schemas.analytics import (
+    LandlordAnalyticsResponse,
+    ListingAnalyticsItem,
+)
 from app.schemas.listing import ListingCreate, ListingUpdate, ListingResponse
-from app.dependencies.auth import get_current_user, require_landlord
+from app.dependencies.auth import (
+    get_current_user,
+    get_current_user_optional,
+    require_landlord,
+)
 from app.dependencies.csrf import verify_csrf_token
 
 
@@ -92,6 +104,107 @@ def get_my_listings(
 
     return listings
 
+
+@router.get(
+    "/analytics",
+    response_model=LandlordAnalyticsResponse,
+)
+def get_landlord_analytics(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_landlord),
+):
+    listings = (
+        db.query(Listing)
+        .filter(Listing.landlord_id == current_user.id)
+        .all()
+    )
+
+    listing_ids = [listing.id for listing in listings]
+
+    favorites_by_listing = dict(
+        db.query(
+            Favorite.listing_id,
+            func.count(Favorite.id),
+        )
+        .filter(Favorite.listing_id.in_(listing_ids))
+        .group_by(Favorite.listing_id)
+        .all()
+    )
+
+    conversations_by_listing = dict(
+        db.query(
+            Conversation.listing_id,
+            func.count(Conversation.id),
+        )
+        .filter(Conversation.listing_id.in_(listing_ids))
+        .group_by(Conversation.listing_id)
+        .all()
+    )
+
+    messages_received_by_listing = dict(
+        db.query(
+            Conversation.listing_id,
+            func.count(Message.id),
+        )
+        .join(Message, Message.conversation_id == Conversation.id)
+        .filter(
+            Conversation.listing_id.in_(listing_ids),
+            Message.sender_id != current_user.id,
+        )
+        .group_by(Conversation.listing_id)
+        .all()
+    )
+
+    items = []
+
+    for listing in listings:
+        views = listing.views_count or 0
+        conversations = conversations_by_listing.get(listing.id, 0)
+
+        conversion_rate = (
+            round(conversations / views * 100, 1)
+            if views > 0
+            else 0.0
+        )
+
+        items.append(
+            ListingAnalyticsItem(
+                id=listing.id,
+                title=listing.title,
+                views_count=views,
+                favorites_count=favorites_by_listing.get(listing.id, 0),
+                messages_received=messages_received_by_listing.get(listing.id, 0),
+                availability_confirmations_count=(
+                    listing.availability_confirmations_count or 0
+                ),
+                conversion_rate=conversion_rate,
+            )
+        )
+
+    # Highest-performing listings first.
+    items.sort(key=lambda item: item.views_count, reverse=True)
+
+    total_views = sum(item.views_count for item in items)
+    total_conversations = sum(conversations_by_listing.values())
+
+    overall_conversion_rate = (
+        round(total_conversations / total_views * 100, 1)
+        if total_views > 0
+        else 0.0
+    )
+
+    return LandlordAnalyticsResponse(
+        total_views=total_views,
+        total_favorites=sum(item.favorites_count for item in items),
+        total_messages_received=sum(item.messages_received for item in items),
+        total_availability_confirmations=sum(
+            item.availability_confirmations_count for item in items
+        ),
+        conversion_rate=overall_conversion_rate,
+        listings=items,
+    )
+
+
 @router.patch("/{listing_id}", response_model=ListingResponse)
 def update_listing(
     listing_id: int,
@@ -159,6 +272,7 @@ def delete_listing(
 def get_listing(
     listing_id: int,
     db: Session = Depends(get_db),
+    current_user: User | None = Depends(get_current_user_optional),
 ):
     listing = db.query(Listing).filter(Listing.id == listing_id).first()
 
@@ -167,6 +281,12 @@ def get_listing(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Listing not found",
         )
+
+    # Don't count a landlord viewing their own listing.
+    if current_user is None or current_user.id != listing.landlord_id:
+        listing.views_count = (listing.views_count or 0) + 1
+        db.commit()
+        db.refresh(listing)
 
     return listing
 
@@ -249,6 +369,10 @@ def confirm_listing_availability(
 
     listing.last_availability_confirmed_at = (
         datetime.now(timezone.utc)
+    )
+
+    listing.availability_confirmations_count = (
+        (listing.availability_confirmations_count or 0) + 1
     )
 
     db.commit()
