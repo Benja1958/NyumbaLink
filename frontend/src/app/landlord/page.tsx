@@ -8,6 +8,7 @@ import {
 import Link from "next/link";
 
 import {
+  BarChart3,
   Building2,
   Plus,
 } from "lucide-react";
@@ -237,13 +238,23 @@ export default function LandlordPage() {
             </p>
           </div>
 
-          <Link
-            href="/landlord/listings/new"
-            className="flex items-center justify-center gap-2 rounded-lg bg-green-800 px-5 py-3 font-medium text-white hover:bg-green-900"
-          >
-            <Plus className="h-5 w-5" />
-            Add New Property
-          </Link>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/landlord/analytics"
+              className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-3 font-medium text-gray-700 hover:bg-gray-50"
+            >
+              <BarChart3 className="h-5 w-5" />
+              Analytics
+            </Link>
+
+            <Link
+              href="/landlord/listings/new"
+              className="flex items-center justify-center gap-2 rounded-lg bg-green-800 px-5 py-3 font-medium text-white hover:bg-green-900"
+            >
+              <Plus className="h-5 w-5" />
+              Add New Property
+            </Link>
+          </div>
         </div>
 
         <section className="mt-8 grid gap-4 sm:grid-cols-3">
