@@ -30,7 +30,7 @@ export default function HomePage() {
             </div>
 
             <span className="text-xl font-semibold tracking-tight">
-              NyumbaLink
+              KayaHub
             </span>
           </Link>
 
@@ -47,14 +47,14 @@ export default function HomePage() {
           </div>
 
           <h1 className="max-w-3xl font-serif text-5xl font-bold leading-tight md:text-7xl">
-            Your next home,
+            Find your next home
             <span className="block text-amber-400">
-              one link away.
+              with confidence.
             </span>
           </h1>
 
           <p className="mt-5 max-w-2xl text-lg leading-7 text-white/80">
-            NyumbaLink connects tenants with verified landlords across Kenya —
+            KayaHub connects tenants with verified landlords across Kenya —
             from Nairobi to Kisumu, Mombasa to Eldoret.
           </p>
 

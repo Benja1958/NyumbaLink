@@ -18,9 +18,29 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NyumbaLink",
+  metadataBase: new URL("https://kayahub.co.ke"),
+  title: {
+    default: "KayaHub",
+    template: "%s | KayaHub",
+  },
   description:
-    "A modern rental platform for tenants and landlords.",
+    "Find and rent verified homes across Kenya.",
+  applicationName: "KayaHub",
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: "KayaHub",
+    title: "KayaHub — Find your next home with confidence",
+    description:
+      "Find and rent verified homes across Kenya.",
+    locale: "en_KE",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KayaHub — Find your next home with confidence",
+    description:
+      "Find and rent verified homes across Kenya.",
+  },
 };
 
 export default function RootLayout({

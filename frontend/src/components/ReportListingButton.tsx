@@ -138,7 +138,7 @@ export default function ReportListingButton({
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-500">
-                  Help us keep NyumbaLink safe
+                  Help us keep KayaHub safe
                   and trustworthy.
                 </p>
               </div>

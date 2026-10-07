@@ -72,7 +72,7 @@ Focus on stability and production readiness.
 - [x] HTTP-only cookies
 - [x] Refresh tokens
 - [x] Session expiration
-- [ ] CSRF protection
+- [x] CSRF protection
 
 ---
 
@@ -98,12 +98,31 @@ Focus on stability and production readiness.
 
 ## Deployment
 
-- [ ] Deploy FastAPI
-- [ ] Deploy Next.js
-- [ ] Managed PostgreSQL
-- [ ] Production CORS
-- [ ] HTTPS
-- [ ] Monitoring
+- [x] Deploy FastAPI
+- [x] Deploy Next.js
+- [x] Managed PostgreSQL
+- [x] Production CORS
+- [x] HTTPS
+- [x] Monitoring
+    Backend
+        - 5xx errors
+        - authentication failures
+        - database exceptions
+        - image-upload failures
+        - message/report/listing action failures
+        - request latency
+
+     Frontend
+        - uncaught React/Next.js errors
+        - failed API calls
+        - route crashes
+        - client-side exceptions
+
+    Infrastructure
+        - Render CPU/memory
+        - Render service restarts
+        - Vercel runtime errors
+        - backend health endpoint
 
 ---
 
@@ -111,23 +130,24 @@ Focus on stability and production readiness.
 
 ## Trust Features
 
-- [ ] Verified landlord badge
+- [x] Verified landlord badge
 - [ ] Identity verification
 - [ ] Government ID verification
 - [ ] Phone verification
-- [ ] Email verification
-- [ ] Verified property badge
+- [x] Email verification
+- [x] Verified property badge
 
 ---
 
 ## Landlord Profiles
 
-- [ ] Profile page
-- [ ] Member since
+- [x] Profile page
+- [x] Member since
 - [ ] Number of successful rentals
 - [ ] Average response time
-- [ ] Verified status
-- [ ] About landlord
+- [x] Verified status
+- [x] About landlord
+- [x] Profile photo
 
 ---
 

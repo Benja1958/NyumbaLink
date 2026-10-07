@@ -1,10 +1,10 @@
-# NyumbaLink
+# KayaHub
 
-NyumbaLink is a mobile-first rental housing platform designed to connect tenants in Kenya with landlords who are posting available housing options. The goal is to make the rental search process easier, more transparent, and more trustworthy by giving tenants a simple way to browse listings and giving landlords a clean platform to manage their properties.
+KayaHub is a mobile-first rental housing platform designed to connect tenants in Kenya with landlords who are posting available housing options. The goal is to make the rental search process easier, more transparent, and more trustworthy by giving tenants a simple way to browse listings and giving landlords a clean platform to manage their properties.
 
 ## Project Overview
 
-Finding rental housing in Kenya can be difficult because listings are often scattered across WhatsApp groups, Facebook pages, agents, posters, and informal networks. NyumbaLink aims to centralize this process by allowing landlords to post available properties and tenants to search for housing based on location, rent, and property details.
+Finding rental housing in Kenya can be difficult because listings are often scattered across WhatsApp groups, Facebook pages, agents, posters, and informal networks. KayaHub aims to centralize this process by allowing landlords to post available properties and tenants to search for housing based on location, rent, and property details.
 
 The project is currently in early development. We are starting with core authentication and property listing features before adding advanced functionality such as image uploads, landlord verification, admin approval, favorites, inquiries, and search filters.
 

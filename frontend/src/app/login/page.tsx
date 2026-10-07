@@ -169,7 +169,7 @@ function LoginContent() {
         </h1>
 
         <p className="mt-2 text-gray-600">
-          Welcome back to NyumbaLink.
+          Welcome back to KayaHub.
         </p>
 
         {sessionExpired && (

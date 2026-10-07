@@ -22,12 +22,12 @@ def send_verification_email(
         {
             "from": settings.EMAIL_FROM,
             "to": [email],
-            "subject": "Verify your email",
+            "subject": "Verify your KayaHub email",
             "html": f"""
                 <h2>Verify your email</h2>
 
                 <p>
-                    Thanks for creating an account.
+                    Thanks for creating a KayaHub account.
                 </p>
 
                 <p>
@@ -43,6 +43,10 @@ def send_verification_email(
 
                 <p>
                     This link expires in 24 hours.
+                </p>
+
+                <p>
+                    — The KayaHub team
                 </p>
             """,
         }

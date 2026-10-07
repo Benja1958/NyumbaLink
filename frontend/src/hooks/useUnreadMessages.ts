@@ -108,7 +108,7 @@ export function useUnreadMessages({
 
         const title = conversation
           ? conversation.listing.title
-          : "New NyumbaLink message";
+          : "New KayaHub message";
 
         const body = latestMessage
           ? latestMessage.content
@@ -159,7 +159,7 @@ export function useUnreadMessages({
           playNotificationSound();
 
           // Desktop notification is useful mainly
-          // when NyumbaLink isn't the active tab.
+          // when KayaHub isn't the active tab.
           if (document.hidden) {
             showBrowserNotification(
               newestUnreadConversation

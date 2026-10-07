@@ -64,7 +64,7 @@ export default function Navbar() {
           <House className="h-7 w-7 text-indigo-600" />
 
           <span className="text-2xl font-bold text-gray-900">
-            NyumbaLink
+            KayaHub
           </span>
         </Link>
 

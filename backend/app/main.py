@@ -33,7 +33,7 @@ from app.routes import (
 
 
 app = FastAPI(
-    title="NyumbaLink API",
+    title="KayaHub API",
     description="Backend API for a Kenya-based rental housing platform.",
     version="0.5.0",
 )
@@ -55,7 +55,7 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {
-        "message": "Welcome to the NyumbaLink API"
+        "message": "Welcome to the KayaHub API"
     }
 
 

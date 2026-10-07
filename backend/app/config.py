@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     ADMIN_EMAIL: str
     ADMIN_PASSWORD: str
     ADMIN_PHONE_NUMBER: str | None = None
-    ADMIN_FULL_NAME: str = "NyumbaLink Admin"
+    ADMIN_FULL_NAME: str = "KayaHub Admin"
 
     # Cloudinary
     CLOUDINARY_CLOUD_NAME: str
