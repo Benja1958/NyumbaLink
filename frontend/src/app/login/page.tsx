@@ -7,6 +7,7 @@ import {
 } from "react";
 
 import Link from "next/link";
+import PasswordInput from "@/components/PasswordInput";
 
 import { toast } from "sonner";
 
@@ -205,9 +206,8 @@ function LoginContent() {
             className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-green-700"
           />
 
-          <input
+          <PasswordInput
             name="password"
-            type="password"
             placeholder="Password"
             required
             autoComplete="current-password"

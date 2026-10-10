@@ -6,6 +6,7 @@ import {
 } from "react";
 
 import Link from "next/link";
+import PasswordInput from "@/components/PasswordInput";
 import {
   useRouter,
 } from "next/navigation";
@@ -230,9 +231,8 @@ export default function LandlordSignupPage() {
               Password
             </label>
 
-            <input
+            <PasswordInput
               name="password"
-              type="password"
               required
               className="w-full rounded-lg border border-gray-300 px-4 py-3"
             />
@@ -243,9 +243,8 @@ export default function LandlordSignupPage() {
               Confirm Password
             </label>
 
-            <input
+            <PasswordInput
               name="confirm_password"
-              type="password"
               required
               className="w-full rounded-lg border border-gray-300 px-4 py-3"
             />
