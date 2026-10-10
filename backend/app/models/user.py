@@ -92,6 +92,18 @@ class User(Base):
         cascade="all, delete-orphan",
     )
 
+    password_reset_tokens = relationship(
+        "PasswordResetToken",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
+    password_history = relationship(
+        "PasswordHistory",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
     profile_image_url = Column(
         String,
         nullable=True,

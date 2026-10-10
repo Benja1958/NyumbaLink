@@ -216,6 +216,72 @@ export async function loginUser(
   return response.json();
 }
 
+export async function requestPasswordReset(
+  email: string
+): Promise<{
+  message: string;
+}> {
+  const response = await fetch(
+    "/backend-api/auth/forgot-password",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const message =
+      await getErrorMessage(
+        response,
+        "Failed to send reset link"
+      );
+
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+export type ResetPasswordPayload = {
+  token: string;
+  new_password: string;
+  confirm_password: string;
+};
+
+export async function resetPassword(
+  payload: ResetPasswordPayload
+): Promise<{
+  message: string;
+}> {
+  const response = await fetch(
+    "/backend-api/auth/reset-password",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+
+  if (!response.ok) {
+    const message =
+      await getErrorMessage(
+        response,
+        "Failed to reset password"
+      );
+
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
 export async function getCurrentUser(): Promise<User> {
   const response = await authFetch(
     "/backend-api/auth/me"

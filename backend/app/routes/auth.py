@@ -1,6 +1,9 @@
-from datetime import datetime, timezone
+import logging
+
+from datetime import datetime, timedelta, timezone
 from fastapi import (
     APIRouter,
+    BackgroundTasks,
     Depends,
     HTTPException,
     Request,
@@ -21,13 +24,19 @@ from app.schemas.user import (
     UserResponse,
     VerifyEmailRequest,
     ResendVerificationRequest,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
 )
 
 from app.models.email_verification_token import (
     EmailVerificationToken,
 )
+from app.models.password_reset_token import (
+    PasswordResetToken,
+)
 
 from app.services.email import (
+    send_password_reset_email,
     send_verification_email,
 )
 
@@ -46,8 +55,35 @@ from app.services.email_verification import (
     hash_verification_token,
 )
 
+from app.services.password_reset import (
+    PASSWORD_RESET_COOLDOWN_SECONDS,
+    PASSWORD_RESET_EXPIRY_MINUTES,
+    change_user_password,
+    generate_password_reset_token,
+    get_password_reset_expiry,
+    hash_password_reset_token,
+    is_password_reused,
+)
+
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+FORGOT_PASSWORD_MESSAGE = (
+    "If an account exists for this email, "
+    "a password reset link has been sent."
+)
+
+INVALID_RESET_TOKEN_MESSAGE = (
+    "This password reset link is invalid "
+    "or has expired. Please request a new one."
+)
+
+PASSWORD_REUSED_MESSAGE = (
+    "You’ve used this password before. "
+    "Please choose a different password."
+)
 
 
 @router.post(
@@ -550,4 +586,186 @@ def resend_email_verification(
     return {
         "message":
             "If an account exists for that email, a verification email has been sent."
+    }
+
+
+def _send_password_reset_email_safely(
+    email: str,
+    token: str,
+    user_id: int,
+) -> None:
+    # Runs after the response is sent. Never log the token or
+    # attach the exception (its frame locals would include it).
+    try:
+        send_password_reset_email(
+            email,
+            token,
+            PASSWORD_RESET_EXPIRY_MINUTES,
+        )
+    except Exception as error:
+        logger.error(
+            "Failed to send password reset email "
+            "for user_id=%s (%s)",
+            user_id,
+            type(error).__name__,
+        )
+
+
+@router.post("/forgot-password")
+def forgot_password(
+    payload: ForgotPasswordRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    user = (
+        db.query(User)
+        .filter(
+            User.email == payload.email
+        )
+        .first()
+    )
+
+    if not user:
+        return {
+            "message": FORGOT_PASSWORD_MESSAGE
+        }
+
+    now = datetime.now(timezone.utc)
+
+    recent_request = (
+        db.query(PasswordResetToken)
+        .filter(
+            PasswordResetToken.user_id
+            == user.id,
+            PasswordResetToken.created_at
+            > now
+            - timedelta(
+                seconds=PASSWORD_RESET_COOLDOWN_SECONDS
+            ),
+        )
+        .first()
+    )
+
+    if recent_request:
+        return {
+            "message": FORGOT_PASSWORD_MESSAGE
+        }
+
+    # Only the newest reset link should work.
+    db.query(PasswordResetToken).filter(
+        PasswordResetToken.user_id
+        == user.id,
+        PasswordResetToken.used_at.is_(None),
+    ).delete(
+        synchronize_session=False
+    )
+
+    token, token_hash = (
+        generate_password_reset_token()
+    )
+
+    db.add(
+        PasswordResetToken(
+            user_id=user.id,
+            token_hash=token_hash,
+            expires_at=(
+                get_password_reset_expiry()
+            ),
+        )
+    )
+
+    db.commit()
+
+    background_tasks.add_task(
+        _send_password_reset_email_safely,
+        user.email,
+        token,
+        user.id,
+    )
+
+    return {
+        "message": FORGOT_PASSWORD_MESSAGE
+    }
+
+
+@router.post("/reset-password")
+def reset_password(
+    payload: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    token_hash = hash_password_reset_token(
+        payload.token
+    )
+
+    reset_token = (
+        db.query(PasswordResetToken)
+        .filter(
+            PasswordResetToken.token_hash
+            == token_hash
+        )
+        .with_for_update()
+        .first()
+    )
+
+    now = datetime.now(timezone.utc)
+
+    if (
+        not reset_token
+        or reset_token.used_at is not None
+        or reset_token.expires_at < now
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=INVALID_RESET_TOKEN_MESSAGE,
+        )
+
+    user = (
+        db.query(User)
+        .filter(
+            User.id == reset_token.user_id
+        )
+        .first()
+    )
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=INVALID_RESET_TOKEN_MESSAGE,
+        )
+
+    if is_password_reused(
+        db,
+        user,
+        payload.new_password,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=PASSWORD_REUSED_MESSAGE,
+        )
+
+    change_user_password(
+        db,
+        user,
+        payload.new_password,
+    )
+
+    reset_token.used_at = now
+
+    # Invalidate any other outstanding reset links for this user.
+    db.query(PasswordResetToken).filter(
+        PasswordResetToken.user_id
+        == user.id,
+        PasswordResetToken.id
+        != reset_token.id,
+        PasswordResetToken.used_at.is_(None),
+    ).delete(
+        synchronize_session=False
+    )
+
+    db.commit()
+
+    return {
+        "message":
+            "Your password has been reset. "
+            "You can now log in with your new password."
     }

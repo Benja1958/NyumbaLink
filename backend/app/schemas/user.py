@@ -71,6 +71,39 @@ class VerifyEmailRequest(BaseModel):
 class ResendVerificationRequest(BaseModel):
     email: EmailStr
 
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+    confirm_password: str
+
+    @field_validator("confirm_password")
+    @classmethod
+    def passwords_match(
+        cls,
+        confirm_password_value,
+        info,
+    ):
+        new_password = info.data.get(
+            "new_password"
+        )
+
+        if (
+            new_password
+            and confirm_password_value
+            != new_password
+        ):
+            raise ValueError(
+                "Passwords do not match"
+            )
+
+        return confirm_password_value
+
+
 class LandlordProfileResponse(BaseModel):
     id: int
     full_name: str

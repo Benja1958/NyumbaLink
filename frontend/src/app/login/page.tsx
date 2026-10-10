@@ -214,6 +214,15 @@ function LoginContent() {
             className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-green-700"
           />
 
+          <div className="flex justify-end">
+            <Link
+              href="/forgot-password"
+              className="text-sm font-medium text-gray-600 underline-offset-4 hover:text-gray-900 hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
+
           {error && (
             <p className="text-sm text-red-600">
               {error}
