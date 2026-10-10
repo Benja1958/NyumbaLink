@@ -201,7 +201,7 @@ function ResetPasswordContent() {
 
             <Link
               href="/login"
-              className="mt-8 inline-flex w-full items-center justify-center rounded-lg bg-gray-950 py-3 font-medium text-white transition hover:bg-gray-800"
+              className="mt-8 inline-flex w-full items-center justify-center rounded-lg bg-gray-950 py-3 font-medium text-white transition hover:bg-gray-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-950"
             >
               Continue to login
             </Link>
@@ -226,7 +226,7 @@ function ResetPasswordContent() {
 
             <Link
               href="/forgot-password"
-              className="mt-8 inline-flex w-full items-center justify-center rounded-lg bg-gray-950 py-3 font-medium text-white transition hover:bg-gray-800"
+              className="mt-8 inline-flex w-full items-center justify-center rounded-lg bg-gray-950 py-3 font-medium text-white transition hover:bg-gray-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-950"
             >
               Request a new link
             </Link>

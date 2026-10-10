@@ -214,10 +214,10 @@ function LoginContent() {
             className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-green-700"
           />
 
-          <div className="flex justify-end">
+          <div>
             <Link
               href="/forgot-password"
-              className="text-sm font-medium text-gray-600 underline-offset-4 hover:text-gray-900 hover:underline"
+              className="text-sm font-medium text-gray-700 underline underline-offset-4 hover:text-gray-950 focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
             >
               Forgot password?
             </Link>

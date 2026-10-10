@@ -99,7 +99,7 @@ export default function ForgotPasswordPage() {
 
             <Link
               href="/login"
-              className="mt-8 inline-flex w-full items-center justify-center rounded-lg bg-gray-950 py-3 font-medium text-white transition hover:bg-gray-800"
+              className="mt-8 inline-flex w-full items-center justify-center rounded-lg bg-gray-950 py-3 font-medium text-white transition hover:bg-gray-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-950"
             >
               Back to login
             </Link>
