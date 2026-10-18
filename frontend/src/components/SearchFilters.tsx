@@ -222,7 +222,7 @@ export default function SearchFilters() {
   }
 
   return (
-    <div className="mt-8">
+    <div className="mt-5 md:mt-8">
       <LocationSearch
         key={filters.location}
         initialLocation={filters.location}
@@ -239,7 +239,7 @@ export default function SearchFilters() {
           role="toolbar"
           aria-label="Property filters"
           onScroll={() => setOpenMenu(null)}
-          className="-mx-6 flex items-center gap-2 overflow-x-auto px-6 py-1 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden"
+          className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 py-1 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden"
         >
           <FilterChip
             ref={filtersChipRef}
@@ -331,6 +331,11 @@ export default function SearchFilters() {
           >
             {isPending ? "Updating…" : ""}
           </span>
+
+          <span
+            aria-hidden="true"
+            className="w-2 shrink-0 md:hidden"
+          />
         </div>
 
         {openMenu && (
@@ -426,11 +431,11 @@ function LocationSearch({
     <form
       role="search"
       onSubmit={handleSubmit}
-      className="flex items-center gap-2 rounded-full border border-gray-300 bg-white py-1.5 pl-5 pr-1.5 shadow-sm focus-within:border-gray-900"
+      className="flex items-center gap-2 rounded-full border border-gray-300 bg-white py-1 pl-4 pr-1 shadow-sm focus-within:border-gray-900 md:py-1.5 md:pl-5 md:pr-1.5"
     >
       <Search
         aria-hidden="true"
-        className="h-5 w-5 shrink-0 text-gray-400"
+        className="hidden h-5 w-5 shrink-0 text-gray-400 md:block"
       />
 
       <label
@@ -448,14 +453,21 @@ function LocationSearch({
         onChange={(event) =>
           setLocation(event.target.value)
         }
-        className="min-w-0 flex-1 bg-transparent py-2 text-gray-900 outline-none placeholder:text-gray-500"
+        className="min-w-0 flex-1 bg-transparent py-2.5 text-base text-gray-900 outline-none placeholder:text-gray-500 md:py-2"
       />
 
       <button
         type="submit"
-        className="shrink-0 rounded-full bg-gray-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-950"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gray-950 text-sm font-medium text-white transition hover:bg-gray-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-950 md:h-auto md:w-auto md:px-5 md:py-2.5"
       >
-        Search
+        <Search
+          aria-hidden="true"
+          className="h-5 w-5 md:hidden"
+        />
+
+        <span className="sr-only md:not-sr-only">
+          Search
+        </span>
       </button>
     </form>
   );

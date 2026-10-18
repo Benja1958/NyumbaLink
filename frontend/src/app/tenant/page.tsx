@@ -76,13 +76,13 @@ export default async function TenantPage({
     <>
       <Navbar />
 
-      <main className="mx-auto max-w-7xl px-6 py-10">
+      <main className="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-10">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">
             Find your next home
           </h1>
 
-          <p className="mt-2 text-gray-600">
+          <p className="mt-1 text-sm text-gray-600 md:mt-2 md:text-base">
             Browse verified rental
             properties.
           </p>
@@ -93,7 +93,7 @@ export default async function TenantPage({
         <SearchFilters />
 
         {listings.length === 0 ? (
-          <div className="mt-10">
+          <div className="mt-6 md:mt-10">
             <EmptyState
               icon={Home}
               title="No properties found"

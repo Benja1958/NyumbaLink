@@ -17,16 +17,16 @@ export default function EmptyState({
   actionHref,
 }: EmptyStateProps) {
   return (
-    <div className="rounded-2xl border border-dashed border-gray-300 bg-white px-8 py-16 text-center">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50">
-        <Icon className="h-8 w-8 text-indigo-600" />
+    <div className="rounded-2xl border border-dashed border-gray-300 bg-white px-5 py-10 text-center md:px-8 md:py-16">
+      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50 md:h-16 md:w-16">
+        <Icon className="h-7 w-7 text-indigo-600 md:h-8 md:w-8" />
       </div>
 
-      <h2 className="mt-6 text-2xl font-semibold text-gray-900">
+      <h2 className="mt-4 text-xl font-semibold text-gray-900 md:mt-6 md:text-2xl">
         {title}
       </h2>
 
-      <p className="mx-auto mt-3 max-w-md text-gray-600">
+      <p className="mx-auto mt-2 max-w-md text-sm text-gray-600 md:mt-3 md:text-base">
         {description}
       </p>
 
