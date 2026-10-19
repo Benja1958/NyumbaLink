@@ -76,7 +76,7 @@ export default async function TenantPage({
     <>
       <Navbar />
 
-      <main className="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-10">
+      <main className="mx-auto w-full max-w-7xl px-4 py-6 md:w-auto md:px-6 md:py-10">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">
             Find your next home

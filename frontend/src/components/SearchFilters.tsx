@@ -431,7 +431,7 @@ function LocationSearch({
     <form
       role="search"
       onSubmit={handleSubmit}
-      className="flex items-center gap-2 rounded-full border border-gray-300 bg-white py-1 pl-4 pr-1 shadow-sm focus-within:border-gray-900 md:py-1.5 md:pl-5 md:pr-1.5"
+      className="flex w-full max-w-full items-center gap-2 rounded-full border border-gray-300 bg-white py-1 pl-4 pr-1 shadow-sm focus-within:border-gray-900 md:py-1.5 md:pl-5 md:pr-1.5"
     >
       <Search
         aria-hidden="true"
@@ -453,7 +453,7 @@ function LocationSearch({
         onChange={(event) =>
           setLocation(event.target.value)
         }
-        className="min-w-0 flex-1 bg-transparent py-2.5 text-base text-gray-900 outline-none placeholder:text-gray-500 md:py-2"
+        className="min-w-0 flex-1 text-ellipsis bg-transparent py-2.5 text-base text-gray-900 outline-none placeholder:text-gray-500 md:py-2"
       />
 
       <button
